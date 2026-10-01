@@ -1,0 +1,15 @@
+spring:
+  mail:
+    host: localhost
+    port: 3025
+    username: cadastro@teste.local
+    password: teste
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+      mail.smtp.starttls.required: false
+
+app:
+  base-url: http://localhost:8080
+  ativacao:
+    expiracao: PT24H
