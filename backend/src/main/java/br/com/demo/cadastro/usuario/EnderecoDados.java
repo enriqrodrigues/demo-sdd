@@ -31,4 +31,14 @@ public record EnderecoDados(
 
         @NotBlank(message = Mensagens.OBRIGATORIO)
         @Pattern(regexp = Uf.REGEX, message = "UF inválida")
-        String uf) {}
+        String uf) {
+
+    public Endereco paraEndereco() {
+        return new Endereco(cep, logradouro, numero, complemento, bairro, cidade, uf);
+    }
+
+    public static EnderecoDados de(Endereco endereco) {
+        return new EnderecoDados(endereco.getCep(), endereco.getLogradouro(), endereco.getNumero(),
+                endereco.getComplemento(), endereco.getBairro(), endereco.getCidade(), endereco.getUf());
+    }
+}
