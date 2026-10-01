@@ -19,6 +19,7 @@
 
   <modules>
     <module>database</module>
+    <module>frontend</module>
     <module>backend</module>
   </modules>
 

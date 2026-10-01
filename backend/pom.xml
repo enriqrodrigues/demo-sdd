@@ -17,6 +17,12 @@
       <artifactId>database</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>br.com.demo.cadastro</groupId>
+      <artifactId>frontend</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
