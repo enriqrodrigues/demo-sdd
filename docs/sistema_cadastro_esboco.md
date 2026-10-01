@@ -56,7 +56,3 @@ Para enriquecer o teste dos frameworks de IA, você pode considerar adicionar op
 * **Feedback Visual Avançado:** Mensagens claras de sucesso, erro de validação e alertas de segurança na interface web.
 
 ---
-
-Com este panorama estruturado, você possui o escopo macro pronto para injetar nos prompts dos frameworks **Superpower**, **OpenSpec** e **BMAD**, permitindo que cada um deles detalhe as especificações técnicas, histórias de usuário e contratos de API de forma autônoma.
-
-Deseja focar a modelagem inicial em algum desses frameworks em específico para começarmos o refinamento?
