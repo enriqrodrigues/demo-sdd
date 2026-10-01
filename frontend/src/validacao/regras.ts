@@ -49,7 +49,15 @@ function hojeIso(): string {
 }
 
 export function dataPassada(iso: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(iso) && iso < hojeIso();
+  const partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!partes) {
+    return false;
+  }
+  const [ano, mes, dia] = [Number(partes[1]), Number(partes[2]), Number(partes[3])];
+  const data = new Date(Date.UTC(ano, mes - 1, dia));
+  data.setUTCFullYear(ano); // anos 0000-0099 não são remapeados para 19xx
+  const existe = data.getUTCFullYear() === ano && data.getUTCMonth() === mes - 1 && data.getUTCDate() === dia;
+  return existe && iso < hojeIso();
 }
 
 export function emailValido(email: string): boolean {

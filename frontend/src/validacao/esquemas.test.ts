@@ -89,6 +89,14 @@ describe('cadastroSchema', () => {
     });
   });
 
+  it('rejeita datas de nascimento impossíveis', () => {
+    for (const dataNascimento of ['2020-13-45', '1990-02-30']) {
+      expect(mensagens(cadastroSchema.safeParse({ ...valido, dataNascimento })).dataNascimento).toBe(
+        'Data de nascimento inválida',
+      );
+    }
+  });
+
   it('rejeita senha acima de 72 bytes', () => {
     const senha = 'Aa1!' + 'é'.repeat(40);
     expect(mensagens(cadastroSchema.safeParse({ ...valido, senha, confirmacaoSenha: senha })).senha).toBe(

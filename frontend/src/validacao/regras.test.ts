@@ -32,6 +32,10 @@ describe('regras', () => {
     expect(dataPassada('1990-05-20')).toBe(true);
     expect(dataPassada('2999-01-01')).toBe(false);
     expect(dataPassada('')).toBe(false);
+    expect(dataPassada('2020-13-45')).toBe(false);
+    expect(dataPassada('1990-02-30')).toBe(false);
+    expect(dataPassada('2000-02-29')).toBe(true);
+    expect(dataPassada('1900-02-29')).toBe(false);
   });
 
   it('valida formato de e-mail', () => {
