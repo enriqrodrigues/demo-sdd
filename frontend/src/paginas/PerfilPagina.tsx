@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, type Path } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { ApiError, requisitar } from '../api/cliente';
@@ -84,6 +84,9 @@ export function PerfilPagina() {
   const [editando, setEditando] = useState(false);
   const [mensagem, setMensagem] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [erroSaida, setErroSaida] = useState<string | null>(null);
+  const [saindo, setSaindo] = useState(false);
+  const saidaEmAndamento = useRef(false);
 
   useEffect(() => {
     let ativo = true;
@@ -103,10 +106,21 @@ export function PerfilPagina() {
   }, [navigate]);
 
   async function sair() {
+    if (saidaEmAndamento.current) return;
+    saidaEmAndamento.current = true;
+    setSaindo(true);
+    setErroSaida(null);
     try {
       await requisitar<void>('POST', '/api/auth/logout');
-    } finally {
       navigate('/login', { replace: true });
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        navigate('/login', { replace: true });
+      } else {
+        saidaEmAndamento.current = false;
+        setSaindo(false);
+        setErroSaida('Não foi possível sair. Tente novamente.');
+      }
     }
   }
 
@@ -125,6 +139,11 @@ export function PerfilPagina() {
     <section className="cartao">
       <h1>Meu perfil</h1>
       {mensagem && <div className="alerta alerta-sucesso">{mensagem}</div>}
+      {erroSaida && (
+        <div className="alerta alerta-erro" role="alert">
+          {erroSaida}
+        </div>
+      )}
       <dl className="dados">
         <dt>Nome</dt>
         <dd>{perfil.nome}</dd>
@@ -164,7 +183,7 @@ export function PerfilPagina() {
           >
             Editar contato
           </button>
-          <button type="button" className="secundario" onClick={sair}>
+          <button type="button" className="secundario" onClick={sair} disabled={saindo}>
             Sair
           </button>
         </div>

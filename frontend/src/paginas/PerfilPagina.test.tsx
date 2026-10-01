@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import type { Perfil } from '../api/tipos';
 import { renderizar } from '../test/renderizar';
@@ -126,5 +126,54 @@ describe('PerfilPagina', () => {
 
     expect(await screen.findByText('Página de login')).toBeInTheDocument();
     expect(saiu).toBe(true);
+  });
+
+  it('sair com erro do servidor mostra alerta e permanece no perfil', async () => {
+    servidor.use(
+      http.get('/api/perfil', () => HttpResponse.json(perfil)),
+      http.post('/api/auth/logout', () =>
+        HttpResponse.json({ codigo: 'ERRO_INTERNO' }, { status: 500, headers: { 'Content-Type': 'application/problem+json' } }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderizarPerfil();
+
+    await user.click(await screen.findByRole('button', { name: 'Sair' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível sair. Tente novamente.');
+    expect(screen.queryByText('Página de login')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sair' })).toBeEnabled();
+  });
+
+  it('sair com sessão já expirada (401) vai para o login', async () => {
+    servidor.use(
+      http.get('/api/perfil', () => HttpResponse.json(perfil)),
+      http.post('/api/auth/logout', () => HttpResponse.json({ codigo: 'NAO_AUTENTICADO' }, { status: 401 })),
+    );
+    const user = userEvent.setup();
+    renderizarPerfil();
+
+    await user.click(await screen.findByRole('button', { name: 'Sair' }));
+
+    expect(await screen.findByText('Página de login')).toBeInTheDocument();
+  });
+
+  it('duplo clique em sair envia uma única requisição', async () => {
+    let chamadas = 0;
+    servidor.use(
+      http.get('/api/perfil', () => HttpResponse.json(perfil)),
+      http.post('/api/auth/logout', async () => {
+        chamadas += 1;
+        await delay(100);
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderizarPerfil();
+
+    await user.dblClick(await screen.findByRole('button', { name: 'Sair' }));
+
+    expect(await screen.findByText('Página de login')).toBeInTheDocument();
+    expect(chamadas).toBe(1);
   });
 });

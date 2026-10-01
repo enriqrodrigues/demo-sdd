@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,6 +52,27 @@ class CadastroIntegrationTest extends IntegrationTest {
                     assertThat(e.email()).isEqualTo(email);
                     assertThat(e.nome()).isEqualTo("Maria da Silva");
                 });
+    }
+
+    @Test
+    void emailComEspacosECaixaMistaEhAceitoENormalizado() throws Exception {
+        String email = DadosTeste.emailUnico();
+        String misto = "  " + email.substring(0, 1).toUpperCase() + email.substring(1).toUpperCase() + " ";
+        postar(DadosTeste.cadastroJson(misto, DadosTeste.cpfValido()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.email").value(email));
+        assertThat(jdbc.queryForObject("select count(*) from usuario where email = ?", Integer.class, email))
+                .isEqualTo(1);
+
+        postar(DadosTeste.cadastroJson(email, DadosTeste.cpfValido()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.codigo").value("EMAIL_JA_CADASTRADO"));
+    }
+
+    @Test
+    void emailComEspacoSoNoFinalEhAceito() throws Exception {
+        postar(DadosTeste.cadastroJson(DadosTeste.emailUnico() + " ", DadosTeste.cpfValido()))
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -133,7 +155,9 @@ class CadastroIntegrationTest extends IntegrationTest {
     void semTokenCsrfRetorna403() throws Exception {
         mvc.perform(post("/api/usuarios").contentType(MediaType.APPLICATION_JSON)
                         .content(DadosTeste.cadastroJson(DadosTeste.emailUnico(), DadosTeste.cpfValido())))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALIDO"));
     }
 
     /**

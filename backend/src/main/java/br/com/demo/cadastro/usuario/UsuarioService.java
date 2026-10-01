@@ -68,9 +68,15 @@ public class UsuarioService {
         return usuario;
     }
 
-    static NegocioException traduzirViolacao(DataIntegrityViolationException e) {
+    static RuntimeException traduzirViolacao(DataIntegrityViolationException e) {
         String mensagem = String.valueOf(e.getMostSpecificCause().getMessage());
-        return mensagem.contains("uk_usuario_email") ? emailDuplicado() : cpfDuplicado();
+        if (mensagem.contains("uk_usuario_email")) {
+            return emailDuplicado();
+        }
+        if (mensagem.contains("uk_usuario_cpf")) {
+            return cpfDuplicado();
+        }
+        return e;
     }
 
     private Usuario buscarExistente(UUID id) {

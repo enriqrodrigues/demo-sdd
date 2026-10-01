@@ -25,6 +25,10 @@ cp .env.example .env
 # edite MAIL_USERNAME e MAIL_PASSWORD (senha de app, sem espaços)
 ```
 
+O `docker compose -f database/docker-compose.yml` lê o `.env` da pasta `database/` (não o da raiz).
+Os valores padrão (`DB_USERNAME`/`DB_PASSWORD` = `cadastro`) funcionam sem configuração; para usar outros,
+exporte-os no shell ou crie `database/.env`, e mantenha os mesmos valores no `.env` da raiz usado pela aplicação.
+
 ## Executar (JAR único)
 
 ```bash
@@ -44,13 +48,17 @@ mvn -pl backend spring-boot:run                    # API em :8080
 cd frontend && npm run dev                         # SPA em :5173
 ```
 
+Os comandos `npm` exigem Node 24 no `PATH`. Se não houver um instalado, o build Maven do frontend baixa um em
+`frontend/node/` (execute `mvn -DskipTests -pl database,frontend install` antes) e basta colocá-lo no `PATH`:
+`export PATH="$PWD/frontend/node:$PATH"` (Git Bash/Linux/macOS) na raiz do projeto.
+
 Para o link do e-mail apontar para o Vite, defina `APP_BASE_URL=http://localhost:5173` no `.env`.
 
 ## Testes
 
 ```bash
 mvn verify        # backend (JUnit + Testcontainers + GreenMail) e frontend (Vitest); requer Docker
-cd frontend && npm test
+cd frontend && npm test   # também requer Node 24 no PATH (veja acima)
 ```
 
 ## Verificação manual (Gmail real)

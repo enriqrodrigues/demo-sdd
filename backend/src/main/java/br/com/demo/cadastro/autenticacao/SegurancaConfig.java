@@ -23,7 +23,9 @@ class SegurancaConfig {
                         .requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
-                .exceptionHandling(erros -> erros.authenticationEntryPoint(new NaoAutenticadoEntryPoint()))
+                .exceptionHandling(erros -> erros
+                        .authenticationEntryPoint(new NaoAutenticadoEntryPoint())
+                        .accessDeniedHandler(new CsrfInvalidoHandler()))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable);

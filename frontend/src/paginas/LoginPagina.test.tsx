@@ -62,6 +62,16 @@ describe('LoginPagina', () => {
     expect(await screen.findByText('Sua conta ainda não foi ativada. Verifique seu e-mail.')).toBeInTheDocument();
   });
 
+  it('não confunde recusa de CSRF (403) com conta pendente', async () => {
+    servidor.use(http.post('/api/auth/login', () => problema(403, 'CSRF_INVALIDO')));
+    renderizarLogin();
+
+    await entrar();
+
+    expect(await screen.findByText('Não foi possível entrar. Tente novamente.')).toBeInTheDocument();
+    expect(screen.queryByText('Sua conta ainda não foi ativada. Verifique seu e-mail.')).not.toBeInTheDocument();
+  });
+
   it('exige e-mail e senha', async () => {
     const user = userEvent.setup();
     renderizarLogin();

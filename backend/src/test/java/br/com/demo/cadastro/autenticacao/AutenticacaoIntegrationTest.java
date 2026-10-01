@@ -50,6 +50,15 @@ class AutenticacaoIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void loginAceitaEmailComEspacosECaixaDiferente() throws Exception {
+        String email = DadosTeste.emailUnico();
+        cadastrar(email, DadosTeste.cpfValido());
+        marcarComoAtivo(email);
+
+        login("  " + email.toUpperCase() + " ", DadosTeste.SENHA).andExpect(status().isOk());
+    }
+
+    @Test
     void senhaErradaEEmailInexistenteRetornamOMesmo401() throws Exception {
         String email = DadosTeste.emailUnico();
         cadastrar(email, DadosTeste.cpfValido());

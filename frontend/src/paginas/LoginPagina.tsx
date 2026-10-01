@@ -29,7 +29,7 @@ export function LoginPagina() {
     } catch (erro) {
       if (erro instanceof ApiError && erro.status === 401) {
         setErroGeral('E-mail ou senha inválidos.');
-      } else if (erro instanceof ApiError && erro.status === 403) {
+      } else if (erro instanceof ApiError && erro.codigo === 'CONTA_PENDENTE') {
         setErroGeral('Sua conta ainda não foi ativada. Verifique seu e-mail.');
       } else if (erro instanceof ApiError && erro.erros.length > 0) {
         for (const { campo, mensagem } of erro.erros) {

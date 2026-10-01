@@ -15,15 +15,22 @@ class TraducaoViolacaoTest {
 
     @Test
     void violacaoDeEmailViraConflitoNoCampoEmail() {
-        NegocioException e = UsuarioService.traduzirViolacao(violacao("uk_usuario_email"));
+        NegocioException e = (NegocioException) UsuarioService.traduzirViolacao(violacao("uk_usuario_email"));
         assertThat(e.getCodigo()).isEqualTo("EMAIL_JA_CADASTRADO");
         assertThat(e.getCampo()).isEqualTo("email");
     }
 
     @Test
     void violacaoDeCpfViraConflitoNoCampoCpf() {
-        NegocioException e = UsuarioService.traduzirViolacao(violacao("uk_usuario_cpf"));
+        NegocioException e = (NegocioException) UsuarioService.traduzirViolacao(violacao("uk_usuario_cpf"));
         assertThat(e.getCodigo()).isEqualTo("CPF_JA_CADASTRADO");
         assertThat(e.getCampo()).isEqualTo("cpf");
+    }
+
+    @Test
+    void violacaoNaoRelacionadaEhRelancadaSemTraducao() {
+        DataIntegrityViolationException outra = new DataIntegrityViolationException("falha",
+                new RuntimeException("null value in column \"nome\" violates not-null constraint"));
+        assertThat(UsuarioService.traduzirViolacao(outra)).isSameAs(outra);
     }
 }

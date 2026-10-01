@@ -38,4 +38,9 @@ public record NovoUsuario(
 
         @NotNull(message = Mensagens.OBRIGATORIO)
         @Valid
-        EnderecoDados endereco) {}
+        EnderecoDados endereco) {
+
+    public NovoUsuario {
+        email = email == null ? null : email.strip();
+    }
+}

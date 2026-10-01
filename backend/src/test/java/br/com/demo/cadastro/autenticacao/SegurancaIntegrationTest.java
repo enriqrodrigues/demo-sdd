@@ -43,7 +43,9 @@ class SegurancaIntegrationTest extends IntegrationTest {
     @Test
     void mutacaoSemTokenCsrfEhRecusada() throws Exception {
         mvc.perform(post("/api/ativacao").contentType(MediaType.APPLICATION_JSON).content("{}"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.codigo").value("CSRF_INVALIDO"));
     }
 
     @Test
