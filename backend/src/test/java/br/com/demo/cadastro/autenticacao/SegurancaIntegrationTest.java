@@ -12,8 +12,11 @@ import br.com.demo.cadastro.support.IntegrationTest;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MvcResult;
 
+// csrf() de outras classes troca o repositório de token do CsrfFilter compartilhado; contexto limpo garante o cookie XSRF-TOKEN real.
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class SegurancaIntegrationTest extends IntegrationTest {
 
     @Test
