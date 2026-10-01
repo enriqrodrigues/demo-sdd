@@ -37,6 +37,19 @@ public final class DadosTeste {
                 new EnderecoDados("01310100", "Avenida Paulista", "1000", "Apto 12", "Bela Vista", "São Paulo", "SP"));
     }
 
+    public static String cadastroJson(String email, String cpf) {
+        return cadastroJson(email, cpf, "Maria da Silva");
+    }
+
+    public static String cadastroJson(String email, String cpf, String nome) {
+        return """
+                {"nome":"%s","cpf":"%s","email":"%s","dataNascimento":"1990-05-20","senha":"%s",
+                 "telefone":"11987654321",
+                 "endereco":{"cep":"01310100","logradouro":"Avenida Paulista","numero":"1000",
+                             "complemento":"Apto 12","bairro":"Bela Vista","cidade":"São Paulo","uf":"SP"}}
+                """.formatted(nome, cpf, email, SENHA);
+    }
+
     private static boolean todosIguais(int[] d) {
         for (int i = 1; i < 9; i++) {
             if (d[i] != d[0]) {
