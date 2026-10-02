@@ -39,6 +39,23 @@ java -jar backend/target/backend-0.1.0-SNAPSHOT.jar
 
 Acesse http://localhost:8080.
 
+> **Windows com antivírus que inspeciona TLS (ex.: Avast):** o envio do e-mail de ativação falha com
+> `PKIX path building failed`, porque o certificado do `smtp.gmail.com` chega assinado pela raiz do antivírus,
+> que o JDK não conhece. Suba a aplicação fazendo a JVM confiar no repositório de certificados do Windows:
+>
+> ```bash
+> java -Djavax.net.ssl.trustStoreType=Windows-ROOT -jar backend/target/backend-0.1.0-SNAPSHOT.jar
+> ```
+>
+> Detalhes em [Solução de problemas](#solução-de-problemas).
+
+Para parar: encerre a aplicação com `Ctrl+C` no terminal onde o JAR está rodando e derrube o ambiente do Docker:
+
+```bash
+docker compose -f database/docker-compose.yml down      # para e remove o container (dados preservados no volume)
+docker compose -f database/docker-compose.yml down -v   # idem, apagando também os dados do banco
+```
+
 ## Desenvolvimento com hot reload
 
 ```bash
@@ -72,6 +89,19 @@ cd frontend && npm test   # também requer Node 24 no PATH (veja acima)
 7. Edite telefone e endereço, salve e recarregue → as alterações persistiram.
 8. Tente cadastrar de novo com o mesmo e-mail e, depois, com o mesmo CPF → erro no campo correspondente.
 9. Clique em "Sair" e acesse `/perfil` → volta para o login.
+
+## Solução de problemas
+
+**`PKIX path building failed` ao enviar o e-mail de ativação.** Um antivírus com inspeção de TLS (ex.: Avast Mail Shield)
+troca o certificado do `smtp.gmail.com` por um assinado pela raiz dele, que está no repositório de certificados do Windows
+mas não no `cacerts` do JDK. Faça a JVM usar o repositório do Windows:
+
+```bash
+java -Djavax.net.ssl.trustStoreType=Windows-ROOT -jar backend/target/backend-0.1.0-SNAPSHOT.jar
+mvn -pl backend spring-boot:run -Dspring-boot.run.jvmArguments="-Djavax.net.ssl.trustStoreType=Windows-ROOT"
+```
+
+Alternativa: desativar a verificação de conexões SSL de saída (SMTP) no antivírus.
 
 ## Limitação conhecida
 
