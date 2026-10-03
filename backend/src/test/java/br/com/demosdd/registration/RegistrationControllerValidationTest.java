@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,15 +13,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import br.com.demosdd.shared.security.SecurityConfig;
+
 /**
  * Formato de erro da validação (RF02, design D6) sem banco: o serviço é
- * simulado e nunca deve ser chamado com dados inválidos.
+ * simulado e nunca deve ser chamado com dados inválidos. Usa a configuração de
+ * segurança real, com o token anti-CSRF que a interface envia.
  */
 @WebMvcTest(RegistrationController.class)
+@Import(SecurityConfig.class)
 class RegistrationControllerValidationTest {
 
     @Autowired
@@ -48,7 +54,7 @@ class RegistrationControllerValidationTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/registrations").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/registrations").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.status").value(400))
@@ -69,7 +75,7 @@ class RegistrationControllerValidationTest {
                 .replace("\"529.982.247-25\"", "\"529.982.247-26\"")
                 .replace("\"(11) 98765-4321\"", "\"(11) 8765-432\"");
 
-        mockMvc.perform(post("/api/registrations").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/registrations").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors[*].field").value(containsInAnyOrder("cpf", "phone")));
 
@@ -80,7 +86,7 @@ class RegistrationControllerValidationTest {
     void dataEmFormatoInvalidoEhApontadaNoCampo() throws Exception {
         String body = TestPayloads.validRegistration().replace("\"1990-05-20\"", "\"20/05/1990\"");
 
-        mockMvc.perform(post("/api/registrations").contentType(MediaType.APPLICATION_JSON).content(body))
+        mockMvc.perform(post("/api/registrations").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
                 .andExpect(jsonPath("$.errors[0].field").value("birthDate"));
@@ -88,7 +94,7 @@ class RegistrationControllerValidationTest {
 
     @Test
     void campoAusenteEhObrigatorio() throws Exception {
-        mockMvc.perform(post("/api/registrations").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        mockMvc.perform(post("/api/registrations").with(csrf()).contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.length()").value(12))
                 .andExpect(jsonPath("$.errors[*].message").value(hasItem("Campo obrigatório")));

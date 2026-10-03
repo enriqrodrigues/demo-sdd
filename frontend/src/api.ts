@@ -47,13 +47,53 @@ async function toProblem(response: Response): Promise<ApiProblem> {
   };
 }
 
-async function postJson<T>(url: string, payload: unknown): Promise<ApiResult<T>> {
+// Proteção CSRF no padrão SPA (design D4): o servidor emite o token no cookie
+// XSRF-TOKEN e a interface o devolve no cabeçalho X-XSRF-TOKEN.
+const XSRF_COOKIE = 'XSRF-TOKEN';
+const XSRF_HEADER = 'X-XSRF-TOKEN';
+const CSRF_URL = '/api/auth/csrf';
+
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+function readCookie(name: string): string | null {
+  for (const entry of document.cookie.split(';')) {
+    const [key, ...value] = entry.trim().split('=');
+    if (key === name) {
+      const decoded = decodeURIComponent(value.join('='));
+      return decoded === '' ? null : decoded;
+    }
+  }
+  return null;
+}
+
+/** Token anti-CSRF do cookie; se ainda não existe (ou foi apagado no logout), pede um ao servidor. */
+async function xsrfToken(): Promise<string | null> {
+  const current = readCookie(XSRF_COOKIE);
+  if (current) {
+    return current;
+  }
+  await fetch(CSRF_URL, { method: 'GET', credentials: 'same-origin' });
+  return readCookie(XSRF_COOKIE);
+}
+
+async function request<T>(method: Method, url: string, payload?: unknown): Promise<ApiResult<T>> {
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (payload !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
   let response: Response;
   try {
+    if (method !== 'GET') {
+      const token = await xsrfToken();
+      if (token) {
+        headers[XSRF_HEADER] = token;
+      }
+    }
     response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload),
+      method,
+      headers,
+      credentials: 'same-origin',
+      body: payload === undefined ? undefined : JSON.stringify(payload),
     });
   } catch {
     return { ok: false, problem: NETWORK_PROBLEM };
@@ -61,15 +101,18 @@ async function postJson<T>(url: string, payload: unknown): Promise<ApiResult<T>>
   if (!response.ok) {
     return { ok: false, problem: await toProblem(response) };
   }
+  if (response.status === 204) {
+    return { ok: true, data: undefined as T };
+  }
   return { ok: true, data: (await response.json()) as T };
 }
 
 export type RegistrationPayload = Record<string, string>;
 
 export function register(payload: RegistrationPayload): Promise<ApiResult<{ email: string }>> {
-  return postJson('/api/registrations', payload);
+  return request('POST', '/api/registrations', payload);
 }
 
 export function activate(token: string): Promise<ApiResult<{ email: string }>> {
-  return postJson('/api/activations', { token });
+  return request('POST', '/api/activations', { token });
 }

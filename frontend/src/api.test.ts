@@ -1,9 +1,79 @@
 import { activate, register } from './api';
 import { mockFetchNetworkError, mockFetchResponse, problem } from './test/fetchMock';
+import { TEST_XSRF_TOKEN } from './test/setup';
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
+
+function clearXsrfCookie() {
+  document.cookie = 'XSRF-TOKEN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+}
+
+/** fetch que emite o cookie em /api/auth/csrf (como o servidor) e responde 201 ao resto. */
+function mockFetchIssuingXsrfCookie(issuedToken: string) {
+  const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+    if (url === '/api/auth/csrf') {
+      document.cookie = `XSRF-TOKEN=${issuedToken}; path=/`;
+      return new Response(null, { status: 204 });
+    }
+    return new Response(JSON.stringify({ email: 'maria@exemplo.com' }), { status: 201 });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
+// --- Token anti-CSRF ---
+
+test('POST envia o token do cookie no cabeçalho X-XSRF-TOKEN', async () => {
+  const fetchMock = mockFetchResponse(201, { email: 'maria@exemplo.com' });
+
+  await register({ email: 'maria@exemplo.com' });
+
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  const init = fetchMock.mock.calls[0][1] as RequestInit;
+  expect(init.headers).toEqual(expect.objectContaining({ 'X-XSRF-TOKEN': TEST_XSRF_TOKEN }));
+  expect(init.credentials).toBe('same-origin');
+});
+
+test('sem o cookie, busca o token em /api/auth/csrf antes do POST', async () => {
+  clearXsrfCookie();
+  const fetchMock = mockFetchIssuingXsrfCookie('token-novo');
+
+  const result = await activate('tok123');
+
+  expect(result.ok).toBe(true);
+  expect(fetchMock.mock.calls.map((call) => call[0])).toEqual(['/api/auth/csrf', '/api/activations']);
+  const init = fetchMock.mock.calls[1][1] as RequestInit;
+  expect(init.headers).toEqual(expect.objectContaining({ 'X-XSRF-TOKEN': 'token-novo' }));
+});
+
+test('com o cookie presente, não busca o token de novo', async () => {
+  clearXsrfCookie();
+  const fetchMock = mockFetchIssuingXsrfCookie('token-novo');
+
+  await register({});
+  await register({});
+
+  expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
+    '/api/auth/csrf',
+    '/api/registrations',
+    '/api/registrations',
+  ]);
+});
+
+test('falha de rede ao buscar o token vira NETWORK_ERROR', async () => {
+  clearXsrfCookie();
+  mockFetchNetworkError();
+
+  const result = await register({});
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.code).toBe('NETWORK_ERROR');
+});
+
+// --- Respostas de cadastro e ativação ---
 
 test('201 no cadastro devolve o e-mail', async () => {
   const fetchMock = mockFetchResponse(201, { email: 'maria@exemplo.com' });

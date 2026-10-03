@@ -4,13 +4,13 @@
 
 ## 1. Segurança base e CSRF (sem mudar o comportamento existente)
 
-- [ ] 1.1 Trocar `spring-security-crypto` por `spring-boot-starter-security` e adicionar `spring-security-test` no `backend/pom.xml`. Verificar com `./mvnw -pl backend -am test-compile`.
-- [ ] 1.2 Criar `SecurityConfig` em `shared.security` com as regras de acesso do design D5, `csrf.spa()`, as estratégias de sessão (D3) e o logout padrão em `/api/auth/logout` (204). Criar o entry point 401 `UNAUTHENTICATED` e o handler 403 `CSRF_INVALID`, ambos em `ProblemDetail`. Verificar que o `ApplicationModules.verify()` continua passando.
-- [ ] 1.3 Configurar a sessão no `application.yml` (timeout de 30 min, cookie `http-only`, `same-site=lax`, `secure` via `SESSION_COOKIE_SECURE`, rastreamento só por cookie). Verificar com um teste de configuração de que o timeout é de 30 minutos.
-- [ ] 1.4 Criar `GET /api/auth/csrf` (204, emite o cookie `XSRF-TOKEN`). Verificar com um teste de integração de que a resposta traz o cookie `XSRF-TOKEN`.
-- [ ] 1.5 Ajustar os testes existentes: `postJson` com `.with(csrf())`, e `@Import(SecurityConfig)` + `csrf()` no `RegistrationControllerValidationTest`. Adicionar o teste do cenário "Requisição sem token anti-CSRF" (cadastro recusado com 403 `CSRF_INVALID` e nenhum usuário gravado). Verificar que todos os testes do backend passam.
-- [ ] 1.6 No frontend, fazer o `api.ts` usar um `request` genérico que, nos métodos que alteram estado, garante o cookie `XSRF-TOKEN` (chamando `/api/auth/csrf` se faltar) e envia `X-XSRF-TOKEN`. Verificar com testes Vitest: o cabeçalho é enviado; o cookie é buscado só quando ausente; as respostas de cadastro e ativação continuam tratadas como antes.
-- [ ] 1.7 Verificar a aplicação rodando (`java -jar`): um cadastro feito pela interface chega ao servidor com o token (sem credenciais SMTP, a resposta esperada é 503, e não 403), e um `curl` sem o token recebe 403.
+- [x] 1.1 Trocar `spring-security-crypto` por `spring-boot-starter-security` e adicionar `spring-security-test` no `backend/pom.xml`. Verificar com `./mvnw -pl backend -am test-compile`.
+- [x] 1.2 Criar `SecurityConfig` em `shared.security` com as regras de acesso do design D5, `csrf.spa()`, as estratégias de sessão (D3) e o logout padrão em `/api/auth/logout` (204). Criar o entry point 401 `UNAUTHENTICATED` e o handler 403 `CSRF_INVALID`, ambos em `ProblemDetail`. Verificar que o `ApplicationModules.verify()` continua passando.
+- [x] 1.3 Configurar a sessão no `application.yml` (timeout de 30 min, cookie `http-only`, `same-site=lax`, `secure` via `SESSION_COOKIE_SECURE`, rastreamento só por cookie). Verificar com um teste de configuração de que o timeout é de 30 minutos.
+- [x] 1.4 Criar `GET /api/auth/csrf` (204, emite o cookie `XSRF-TOKEN`). Verificar com um teste de integração de que a resposta traz o cookie `XSRF-TOKEN`.
+- [x] 1.5 Ajustar os testes existentes: `postJson` com `.with(csrf())`, e `@Import(SecurityConfig)` + `csrf()` no `RegistrationControllerValidationTest`. Adicionar o teste do cenário "Requisição sem token anti-CSRF" (cadastro recusado com 403 `CSRF_INVALID` e nenhum usuário gravado). Verificar que todos os testes do backend passam.
+- [x] 1.6 No frontend, fazer o `api.ts` usar um `request` genérico que, nos métodos que alteram estado, garante o cookie `XSRF-TOKEN` (chamando `/api/auth/csrf` se faltar) e envia `X-XSRF-TOKEN`. Verificar com testes Vitest: o cabeçalho é enviado; o cookie é buscado só quando ausente; as respostas de cadastro e ativação continuam tratadas como antes.
+- [x] 1.7 Verificar a aplicação rodando (`java -jar`): um cadastro feito pela interface chega ao servidor com o token (sem credenciais SMTP, a resposta esperada é 503, e não 403), e um `curl` sem o token recebe 403.
 
 ## 2. Login, sessão e logout (backend)
 

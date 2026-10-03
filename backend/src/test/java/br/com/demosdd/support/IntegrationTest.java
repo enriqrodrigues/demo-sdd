@@ -4,6 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,12 +20,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import com.icegreen.greenmail.configuration.GreenMailConfiguration;
 import com.icegreen.greenmail.junit5.GreenMailExtension;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.Cookie;
 import jakarta.mail.Multipart;
 import jakarta.mail.Part;
 import jakarta.mail.internet.MimeMessage;
@@ -40,6 +44,9 @@ import jakarta.mail.internet.MimeMessage;
 public abstract class IntegrationTest {
 
     private static final Pattern TOKEN_IN_LINK = Pattern.compile("/ativar\\?token=([A-Za-z0-9_-]+)");
+
+    protected static final String XSRF_COOKIE = "XSRF-TOKEN";
+    protected static final String XSRF_HEADER = "X-XSRF-TOKEN";
 
     @RegisterExtension
     protected static final GreenMailExtension greenMail = new GreenMailExtension(ServerSetupTest.SMTP)
@@ -61,8 +68,30 @@ public abstract class IntegrationTest {
         clock.setInstant(Instant.now());
     }
 
+    /** POST em JSON com um token anti-CSRF válido, como faz a interface. */
     protected ResultActions postJson(String url, String body) throws Exception {
-        return mockMvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content(body));
+        return mockMvc.perform(post(url).with(xsrfToken()).contentType(MediaType.APPLICATION_JSON).content(body));
+    }
+
+    /**
+     * Token anti-CSRF no formato da interface: cookie {@code XSRF-TOKEN} e o mesmo
+     * valor no cabeçalho {@code X-XSRF-TOKEN}. Diferente do {@code csrf()} do
+     * spring-security-test, passa pelo repositório de tokens real e não o troca
+     * no contexto compartilhado entre os testes.
+     */
+    protected static RequestPostProcessor xsrfToken() {
+        return xsrfToken(UUID.randomUUID().toString());
+    }
+
+    protected static RequestPostProcessor xsrfToken(String token) {
+        return request -> {
+            Cookie[] current = request.getCookies() == null ? new Cookie[0] : request.getCookies();
+            Cookie[] cookies = Arrays.copyOf(current, current.length + 1);
+            cookies[current.length] = new Cookie(XSRF_COOKIE, token);
+            request.setCookies(cookies);
+            request.addHeader(XSRF_HEADER, token);
+            return request;
+        };
     }
 
     protected ResultActions activate(String token) throws Exception {

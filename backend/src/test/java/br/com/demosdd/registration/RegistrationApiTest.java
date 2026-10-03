@@ -2,6 +2,7 @@ package br.com.demosdd.registration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -10,9 +11,12 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import br.com.demosdd.support.IntegrationTest;
+
+import jakarta.servlet.http.Cookie;
 
 /** Cenários da spec user-registration exercitados pela API, com banco real. */
 class RegistrationApiTest extends IntegrationTest {
@@ -171,6 +175,31 @@ class RegistrationApiTest extends IntegrationTest {
         assertThat(countUsers()).isEqualTo(2);
         assertThat(jdbc.queryForObject("SELECT cpf FROM users WHERE email = ?", String.class, EMAIL))
                 .isEqualTo("11144477735");
+    }
+
+    // --- Proteção contra requisições forjadas (spec authentication) ---
+
+    @Test
+    void cadastroSemTokenAntiCsrfEhRecusadoSemGravarNada() throws Exception {
+        mockMvc.perform(post("/api/registrations").contentType(MediaType.APPLICATION_JSON)
+                        .content(TestPayloads.validRegistration()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
+
+        assertThat(countUsers()).isZero();
+        assertThat(greenMail.getReceivedMessages()).isEmpty();
+    }
+
+    @Test
+    void cadastroComTokenAntiCsrfInvalidoEhRecusado() throws Exception {
+        mockMvc.perform(post("/api/registrations")
+                        .cookie(new Cookie(XSRF_COOKIE, "token-emitido-pelo-sistema"))
+                        .header(XSRF_HEADER, "token-forjado")
+                        .contentType(MediaType.APPLICATION_JSON).content(TestPayloads.validRegistration()))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
+
+        assertThat(countUsers()).isZero();
     }
 
     // --- Cadastro só é concluído com o e-mail enviado ---

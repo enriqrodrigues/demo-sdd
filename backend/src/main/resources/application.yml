@@ -4,6 +4,9 @@ spring:
   config:
     # Variáveis locais (banco, SMTP do Gmail). Ver .env.example na raiz do projeto.
     import: optional:file:.env[.properties]
+  autoconfigure:
+    # O login é próprio (módulo auth); sem o usuário em memória gerado pelo Boot.
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${POSTGRES_DB:demosdd}
     username: ${POSTGRES_USER:demosdd}
@@ -24,6 +27,18 @@ spring:
       mail.smtp.connectiontimeout: 10000
       mail.smtp.timeout: 10000
       mail.smtp.writetimeout: 10000
+
+server:
+  servlet:
+    session:
+      # Expira após 30 minutos sem requisições; em memória (perde-se ao reiniciar).
+      timeout: 30m
+      tracking-modes: cookie
+      cookie:
+        http-only: true
+        same-site: lax
+        # Só com HTTPS; a execução local é em http.
+        secure: ${SESSION_COOKIE_SECURE:false}
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
