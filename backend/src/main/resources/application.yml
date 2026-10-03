@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: cadastro
+  config:
+    import: "optional:file:.env[.properties],optional:file:../.env[.properties]"
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/cadastro}
+    username: ${DB_USERNAME:cadastro}
+    password: ${DB_PASSWORD:cadastro}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+  modulith:
+    events:
+      republish-outstanding-events-on-restart: true
+
+server:
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  ativacao:
+    expiracao: ${APP_ATIVACAO_EXPIRACAO:PT24H}

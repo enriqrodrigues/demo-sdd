@@ -55,4 +55,4 @@ Para enriquecer o teste dos frameworks de IA, você pode considerar adicionar op
 * **Painel Administrativo Básico:** Uma visão restrita para listar usuários cadastrados, verificar status (Ativo/Pendente) e realizar desativações manuais.
 * **Feedback Visual Avançado:** Mensagens claras de sucesso, erro de validação e alertas de segurança na interface web.
 
----
+

@@ -1,0 +1,22 @@
+CREATE TABLE usuario (
+    id              UUID         PRIMARY KEY,
+    nome            VARCHAR(150) NOT NULL,
+    cpf             CHAR(11)     NOT NULL,
+    email           VARCHAR(254) NOT NULL,
+    data_nascimento DATE         NOT NULL,
+    senha_hash      VARCHAR(100) NOT NULL,
+    telefone        VARCHAR(11)  NOT NULL,
+    cep             CHAR(8)      NOT NULL,
+    logradouro      VARCHAR(200) NOT NULL,
+    numero          VARCHAR(10)  NOT NULL,
+    complemento     VARCHAR(100),
+    bairro          VARCHAR(100) NOT NULL,
+    cidade          VARCHAR(100) NOT NULL,
+    uf              CHAR(2)      NOT NULL,
+    status          VARCHAR(20)  NOT NULL,
+    criado_em       TIMESTAMPTZ  NOT NULL,
+    atualizado_em   TIMESTAMPTZ  NOT NULL,
+    CONSTRAINT uk_usuario_email UNIQUE (email),
+    CONSTRAINT uk_usuario_cpf UNIQUE (cpf),
+    CONSTRAINT ck_usuario_status CHECK (status IN ('PENDENTE_ATIVACAO', 'ATIVO'))
+);
