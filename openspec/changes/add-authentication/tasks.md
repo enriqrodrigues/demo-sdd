@@ -14,11 +14,11 @@
 
 ## 2. Login, sessão e logout (backend)
 
-- [ ] 2.1 Criar o módulo `auth` com `AuthenticatedUser`, `LoginRequest` (normaliza o e-mail; campos obrigatórios) e o `LoginService`, seguindo a ordem do design D2: hash fictício para e-mail inexistente, 401 `INVALID_CREDENTIALS`, 403 `ACCOUNT_PENDING`, estratégia de sessão e gravação do `SecurityContext`. Verificar com testes de integração: login de conta ativa (200 com nome e e-mail); e-mail com caixa diferente; senha errada; e-mail inexistente (mesma mensagem); campos vazios (400).
-- [ ] 2.2 Cobrir a RN04 no login. Verificar com testes de integração: conta pendente com senha correta recebe 403 `ACCOUNT_PENDING`, sem sessão autenticada; conta pendente com senha errada recebe 401; login após ativação via `/api/activations` funciona.
-- [ ] 2.3 Criar `GET /api/auth/me` com os dados do banco pelo id do principal. Verificar com testes de integração: 200 com sessão; 401 `UNAUTHENTICATED` sem sessão; 401 com a sessão invalidada (cenário "Sessão expirada").
-- [ ] 2.4 Verificar a segurança da sessão com testes de integração: o cookie de sessão é `HttpOnly`; o id de sessão muda no login; depois do logout (`POST /api/auth/logout` → 204), `/me` responde 401 com a mesma sessão; cadastro, ativação e login continuam acessíveis sem sessão.
-- [ ] 2.5 Verificar as fronteiras: o `ApplicationModules.verify()` passa com o módulo `auth`, e `shared` não depende de `auth`.
+- [x] 2.1 Criar o módulo `auth` com `AuthenticatedUser`, `LoginRequest` (normaliza o e-mail; campos obrigatórios) e o `LoginService`, seguindo a ordem do design D2: hash fictício para e-mail inexistente, 401 `INVALID_CREDENTIALS`, 403 `ACCOUNT_PENDING`, estratégia de sessão e gravação do `SecurityContext`. Verificar com testes de integração: login de conta ativa (200 com nome e e-mail); e-mail com caixa diferente; senha errada; e-mail inexistente (mesma mensagem); campos vazios (400).
+- [x] 2.2 Cobrir a RN04 no login. Verificar com testes de integração: conta pendente com senha correta recebe 403 `ACCOUNT_PENDING`, sem sessão autenticada; conta pendente com senha errada recebe 401; login após ativação via `/api/activations` funciona.
+- [x] 2.3 Criar `GET /api/auth/me` com os dados do banco pelo id do principal. Verificar com testes de integração: 200 com sessão; 401 `UNAUTHENTICATED` sem sessão; 401 com a sessão invalidada (cenário "Sessão expirada").
+- [x] 2.4 Verificar a segurança da sessão com testes de integração: o cookie de sessão é `HttpOnly`; o id de sessão muda no login; depois do logout (`POST /api/auth/logout` → 204), `/me` responde 401 com a mesma sessão; cadastro, ativação e login continuam acessíveis sem sessão.
+- [x] 2.5 Verificar as fronteiras: o `ApplicationModules.verify()` passa com o módulo `auth`, e `shared` não depende de `auth`.
 
 ## 3. Login e área interna (frontend)
 
