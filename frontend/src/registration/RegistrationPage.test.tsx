@@ -36,9 +36,10 @@ describe('formulário de cadastro', () => {
     expect(screen.getByText('(opcional)')).toBeInTheDocument();
   });
 
-  test('a rota raiz redireciona para o cadastro', () => {
-    renderApp('/');
-    expect(screen.getByRole('heading', { name: 'Crie sua conta' })).toBeInTheDocument();
+  test('oferece o link para entrar com uma conta existente', () => {
+    renderApp('/cadastro');
+    expect(screen.getByText(/Já tem conta\?/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/login');
   });
 
   test('aplica máscaras de CPF, telefone (fixo e celular) e CEP', async () => {

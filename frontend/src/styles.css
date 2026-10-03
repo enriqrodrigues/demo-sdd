@@ -164,3 +164,12 @@ legend {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.form-footer {
+  margin: 1.5rem 0 0;
+}
+
+a.button {
+  display: inline-block;
+  text-decoration: none;
+}

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { register } from '../api';
 import FormField from './FormField';
 import PasswordChecklist from './PasswordChecklist';
@@ -164,6 +164,10 @@ export default function RegistrationPage() {
           {submitting ? 'Enviando...' : 'Cadastrar'}
         </button>
       </form>
+
+      <p className="form-footer">
+        Já tem conta? <Link to="/login">Entrar</Link>
+      </p>
     </main>
   );
 }

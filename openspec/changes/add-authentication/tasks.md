@@ -22,10 +22,10 @@
 
 ## 3. Login e área interna (frontend)
 
-- [ ] 3.1 Adicionar `login`, `logout` e `me` ao `api.ts`. Verificar com testes Vitest cobrindo 200, 401 `INVALID_CREDENTIALS`, 403 `ACCOUNT_PENDING` e 401 `UNAUTHENTICATED`.
-- [ ] 3.2 Implementar a página `/login`: e-mail e senha obrigatórios, mensagem genérica de credenciais inválidas, orientação de conta pendente, link para o cadastro, estado de carregamento, redirecionamento para `/inicio` quando já autenticado, e o aviso "Você saiu da sua conta." depois do logout. Verificar com testes React Testing Library, um para cada comportamento.
-- [ ] 3.3 Implementar `RequireAuth` e a `HomePage` em `/inicio`, com saudação pelo nome e botão Sair (logout leva a `/login`). Redirecionar `/` para `/inicio`. Verificar com testes React Testing Library: sem sessão vai para `/login`; com sessão mostra o nome; sair chama o logout e vai para `/login`.
-- [ ] 3.4 Adicionar os links "Já tem conta? Entrar" no cadastro e "Entrar" na ativação bem-sucedida, e ajustar o teste da rota raiz. Verificar com testes React Testing Library.
+- [x] 3.1 Adicionar `login`, `logout` e `me` ao `api.ts`. Verificar com testes Vitest cobrindo 200, 401 `INVALID_CREDENTIALS`, 403 `ACCOUNT_PENDING` e 401 `UNAUTHENTICATED`.
+- [x] 3.2 Implementar a página `/login`: e-mail e senha obrigatórios, mensagem genérica de credenciais inválidas, orientação de conta pendente, link para o cadastro, estado de carregamento, redirecionamento para `/inicio` quando já autenticado, e o aviso "Você saiu da sua conta." depois do logout. Verificar com testes React Testing Library, um para cada comportamento.
+- [x] 3.3 Implementar `RequireAuth` e a `HomePage` em `/inicio`, com saudação pelo nome e botão Sair (logout leva a `/login`). Redirecionar `/` para `/inicio`. Verificar com testes React Testing Library: sem sessão vai para `/login`; com sessão mostra o nome; sair chama o logout e vai para `/login`.
+- [x] 3.4 Adicionar os links "Já tem conta? Entrar" no cadastro e "Entrar" na ativação bem-sucedida, e ajustar o teste da rota raiz. Verificar com testes React Testing Library.
 
 ## 4. Documentação e verificação integrada
 

@@ -116,3 +116,19 @@ export function register(payload: RegistrationPayload): Promise<ApiResult<{ emai
 export function activate(token: string): Promise<ApiResult<{ email: string }>> {
   return request('POST', '/api/activations', { token });
 }
+
+export type CurrentUser = { name: string; email: string };
+
+/** 401 INVALID_CREDENTIALS para credenciais inválidas; 403 ACCOUNT_PENDING para conta não ativada. */
+export function login(email: string, password: string): Promise<ApiResult<CurrentUser>> {
+  return request('POST', '/api/auth/login', { email, password });
+}
+
+export function logout(): Promise<ApiResult<void>> {
+  return request('POST', '/api/auth/logout');
+}
+
+/** Usuário da sessão atual; 401 UNAUTHENTICATED quando não há sessão válida. */
+export function me(): Promise<ApiResult<CurrentUser>> {
+  return request('GET', '/api/auth/me');
+}

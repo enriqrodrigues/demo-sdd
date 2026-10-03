@@ -25,6 +25,7 @@ test('ativação bem-sucedida', async () => {
 
   expect(await screen.findByRole('status')).toHaveTextContent('Conta ativada com sucesso!');
   expect(screen.getByText('maria@exemplo.com')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Entrar' })).toHaveAttribute('href', '/login');
   expect(fetchMock).toHaveBeenCalledTimes(1);
   expect(JSON.parse(fetchMock.mock.calls[0][1].body as string)).toEqual({ token: 'abc123' });
 });

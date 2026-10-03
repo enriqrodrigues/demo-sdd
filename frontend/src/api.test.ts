@@ -1,4 +1,4 @@
-import { activate, register } from './api';
+import { activate, login, logout, me, register } from './api';
 import { mockFetchNetworkError, mockFetchResponse, problem } from './test/fetchMock';
 import { TEST_XSRF_TOKEN } from './test/setup';
 
@@ -161,4 +161,78 @@ test('ativação envia o token no corpo', async () => {
     '/api/activations',
     expect.objectContaining({ method: 'POST', body: JSON.stringify({ token: 'tok123' }) }),
   );
+});
+
+// --- Login, logout e usuário da sessão ---
+
+test('login 200 devolve o usuário e envia as credenciais com o token', async () => {
+  const fetchMock = mockFetchResponse(200, { name: 'Maria da Silva', email: 'maria@exemplo.com' });
+
+  const result = await login('maria@exemplo.com', 'Segura@123');
+
+  expect(result).toEqual({ ok: true, data: { name: 'Maria da Silva', email: 'maria@exemplo.com' } });
+  const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(url).toBe('/api/auth/login');
+  expect(init.method).toBe('POST');
+  expect(JSON.parse(init.body as string)).toEqual({ email: 'maria@exemplo.com', password: 'Segura@123' });
+  expect(init.headers).toEqual(expect.objectContaining({ 'X-XSRF-TOKEN': TEST_XSRF_TOKEN }));
+});
+
+test('login 401 INVALID_CREDENTIALS', async () => {
+  mockFetchResponse(401, problem(401, 'INVALID_CREDENTIALS', 'E-mail ou senha inválidos'));
+
+  const result = await login('maria@exemplo.com', 'errada');
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.status).toBe(401);
+  expect(result.problem.code).toBe('INVALID_CREDENTIALS');
+  expect(result.problem.detail).toBe('E-mail ou senha inválidos');
+});
+
+test('login 403 ACCOUNT_PENDING', async () => {
+  mockFetchResponse(403, problem(403, 'ACCOUNT_PENDING', 'Sua conta ainda não foi ativada.'));
+
+  const result = await login('maria@exemplo.com', 'Segura@123');
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.status).toBe(403);
+  expect(result.problem.code).toBe('ACCOUNT_PENDING');
+});
+
+test('me 200 devolve o usuário da sessão, sem token anti-CSRF', async () => {
+  const fetchMock = mockFetchResponse(200, { name: 'Maria da Silva', email: 'maria@exemplo.com' });
+
+  const result = await me();
+
+  expect(result).toEqual({ ok: true, data: { name: 'Maria da Silva', email: 'maria@exemplo.com' } });
+  const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(url).toBe('/api/auth/me');
+  expect(init.method).toBe('GET');
+  expect(init.headers).not.toHaveProperty('X-XSRF-TOKEN');
+});
+
+test('me 401 UNAUTHENTICATED', async () => {
+  mockFetchResponse(401, problem(401, 'UNAUTHENTICATED', 'Faça login para continuar.'));
+
+  const result = await me();
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.status).toBe(401);
+  expect(result.problem.code).toBe('UNAUTHENTICATED');
+});
+
+test('logout 204 é sucesso sem corpo', async () => {
+  const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+  vi.stubGlobal('fetch', fetchMock);
+
+  const result = await logout();
+
+  expect(result).toEqual({ ok: true, data: undefined });
+  const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(url).toBe('/api/auth/logout');
+  expect(init.method).toBe('POST');
+  expect(init.headers).toEqual(expect.objectContaining({ 'X-XSRF-TOKEN': TEST_XSRF_TOKEN }));
 });

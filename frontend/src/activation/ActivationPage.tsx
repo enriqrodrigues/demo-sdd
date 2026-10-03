@@ -63,9 +63,14 @@ export default function ActivationPage() {
       )}
 
       {outcome.kind === 'success' && (
-        <div role="status" className="alert alert--success">
-          Conta ativada com sucesso! O e-mail <strong>{outcome.email}</strong> está confirmado.
-        </div>
+        <>
+          <div role="status" className="alert alert--success">
+            Conta ativada com sucesso! O e-mail <strong>{outcome.email}</strong> está confirmado.
+          </div>
+          <Link to="/login" className="button">
+            Entrar
+          </Link>
+        </>
       )}
 
       {outcome.kind === 'expired' && (
