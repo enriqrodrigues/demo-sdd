@@ -29,8 +29,8 @@
 
 ## 4. Documentação e verificação integrada
 
-- [ ] 4.1 Atualizar o README: login e área interna, novos endpoints, como obter o token CSRF para chamadas manuais (`curl` com cookie e cabeçalho) e a nota sobre a sessão em memória. Verificar executando os comandos `curl` documentados contra a aplicação rodando.
-- [ ] 4.2 Rodar o `./mvnw verify` completo. Verificar que termina com BUILD SUCCESS e sem testes ignorados.
+- [x] 4.1 Atualizar o README: login e área interna, novos endpoints, como obter o token CSRF para chamadas manuais (`curl` com cookie e cabeçalho) e a nota sobre a sessão em memória. Verificar executando os comandos `curl` documentados contra a aplicação rodando.
+- [x] 4.2 Rodar o `./mvnw verify` completo. Verificar que termina com BUILD SUCCESS e sem testes ignorados.
 - [ ] 4.3 Fazer o teste manual ponta a ponta no navegador:
   - criar uma conta ativa direto no banco ou pelo fluxo com Gmail;
   - fazer login e ver a saudação;

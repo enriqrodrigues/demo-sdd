@@ -2,15 +2,21 @@
 
 Implementação do esboço [docs/sistema_cadastro_esboco.md](docs/sistema_cadastro_esboco.md) usando o fluxo **OpenSpec** de desenvolvimento orientado por especificação.
 
-O que já funciona (change `add-user-onboarding`):
+O que já funciona:
 
-- Cadastro pelo formulário web (RF01), com validação ao vivo no formulário e validação definitiva no servidor (RF02).
-- Gravação do usuário como `PENDENTE`, com a senha em hash BCrypt (RF03).
-- E-mail e CPF únicos (RN03). Um cadastro pendente cujo link expirou pode ser refeito com os mesmos dados.
-- Envio real do e-mail de ativação pelo Gmail (RF04).
-- Ativação por link de uso único, válido por 24 horas (RF05, RN02).
+- Change `add-user-onboarding`:
+  - Cadastro pelo formulário web (RF01), com validação ao vivo no formulário e validação definitiva no servidor (RF02).
+  - Gravação do usuário como `PENDENTE`, com a senha em hash BCrypt (RF03).
+  - E-mail e CPF únicos (RN03). Um cadastro pendente cujo link expirou pode ser refeito com os mesmos dados.
+  - Envio real do e-mail de ativação pelo Gmail (RF04).
+  - Ativação por link de uso único, válido por 24 horas (RF05, RN02).
+- Change `add-authentication`:
+  - Login com e-mail e senha de uma conta ativa (RF06), com a mesma mensagem para e-mail inexistente e senha errada.
+  - Conta pendente não entra: com a senha correta, recebe a orientação de ativar a conta pelo e-mail (RN04).
+  - Área interna (`/inicio`) com o nome do usuário e o botão Sair. Sem sessão, a área interna leva ao login, e a API responde 401.
+  - Sessão no servidor, com cookie `HttpOnly` renovado a cada login, expiração após 30 minutos sem uso e proteção CSRF em todas as requisições que alteram estado.
 
-Login (RF06, RN04) e perfil (RF07, RN01) virão nas próximas changes: `add-authentication` e `add-user-profile`.
+O perfil (RF07, RN01) virá na change `add-user-profile`.
 
 ## Arquitetura
 
@@ -32,7 +38,8 @@ O backend se divide em módulos de domínio. O Spring Modulith verifica as front
 | `registration` | cadastro, validação e unicidade (RN03) |
 | `activation` | token, e-mail e ativação da conta |
 | `user` | entidade `User` e repositório |
-| `shared` | validadores, normalização, formato de erro da API e hash de senha |
+| `auth` | login, sessão e dados do usuário autenticado (RF06, RN04) |
+| `shared` | validadores, normalização, formato de erro da API, hash de senha e configuração de segurança (sessão, CSRF, rotas públicas) |
 
 ## Pré-requisitos
 
@@ -58,6 +65,7 @@ Preencha o `.env`. Esse arquivo fica no `.gitignore`.
 | `MAIL_PASSWORD` | A **senha de app** do Gmail (veja abaixo), **não** a senha da conta. |
 | `MAIL_FROM` | Opcional. Remetente exibido; o padrão é `MAIL_USERNAME`. |
 | `APP_BASE_URL` | URL usada no link de ativação. Padrão: `http://localhost:8080`. |
+| `SESSION_COOKIE_SECURE` | Opcional. `true` envia o cookie de sessão só por HTTPS. Padrão: `false`, porque a execução local é em http. |
 
 ### 2. Senha de app do Gmail
 
@@ -105,6 +113,9 @@ npm test           # testes (Vitest + React Testing Library)
 
 | Rota (SPA) | Descrição |
 |---|---|
+| `/` | Leva à área interna, que leva ao login quando não há sessão |
+| `/login` | Login com e-mail e senha. Quem já tem sessão vai direto para `/inicio`. |
+| `/inicio` | Área interna: saudação pelo nome e botão Sair |
 | `/cadastro` | Formulário de cadastro |
 | `/cadastro/sucesso` | Aviso de que o e-mail de ativação foi enviado |
 | `/ativar?token=...` | Página aberta pelo link do e-mail. A ativação só ocorre quando o usuário clica em "Ativar minha conta". |
@@ -113,21 +124,53 @@ npm test           # testes (Vitest + React Testing Library)
 |---|---|---|
 | `POST /api/registrations` | `201 { "email" }` | `400 VALIDATION_ERROR`, `409 ALREADY_REGISTERED`, `409 PENDING_ACTIVATION`, `503 EMAIL_UNAVAILABLE` |
 | `POST /api/activations` `{ "token" }` | `200 { "email" }` | `400 INVALID_TOKEN`, `410 TOKEN_EXPIRED`, `409 TOKEN_ALREADY_USED` |
+| `GET /api/auth/csrf` | `204` + cookie `XSRF-TOKEN` | — |
+| `POST /api/auth/login` `{ "email", "password" }` | `200 { "name", "email" }` + cookie de sessão | `400 VALIDATION_ERROR`, `401 INVALID_CREDENTIALS`, `403 ACCOUNT_PENDING` |
+| `POST /api/auth/logout` | `204` | — |
+| `GET /api/auth/me` | `200 { "name", "email" }` | `401 UNAUTHENTICATED` |
+| qualquer `POST` sem o token anti-CSRF | — | `403 CSRF_INVALID` |
 
 Os erros seguem o formato `ProblemDetail` (RFC 9457), com as extensões `code` e `errors[]` (`{ field, message }`).
+
+### Sessão e token anti-CSRF
+
+- A sessão fica **na memória** da aplicação: reiniciar a aplicação encerra todas as sessões, e o usuário precisa entrar de novo.
+- Toda requisição que altera estado (cadastro, ativação, login e logout) exige o token anti-CSRF. O servidor o emite no cookie `XSRF-TOKEN`, e o cliente o devolve no cabeçalho `X-XSRF-TOKEN`. A interface faz isso sozinha.
+
+Para chamar a API manualmente com `curl`, guarde os cookies num arquivo e envie o token no cabeçalho:
+
+```bash
+# 1. Obter o token anti-CSRF (grava o cookie XSRF-TOKEN em cookies.txt)
+curl -s -c cookies.txt http://localhost:8080/api/auth/csrf
+TOKEN=$(awk '$6 == "XSRF-TOKEN" { print $7 }' cookies.txt)
+
+# 2. Login (grava o cookie de sessão JSESSIONID e o novo token)
+curl -s -b cookies.txt -c cookies.txt -H "X-XSRF-TOKEN: $TOKEN"   -H "Content-Type: application/json"   -d '{"email": "maria@exemplo.com", "password": "Segura@123"}'   http://localhost:8080/api/auth/login
+
+# 3. Usuário da sessão
+curl -s -b cookies.txt http://localhost:8080/api/auth/me
+
+# 4. Logout (o token muda a cada login, então é lido de novo)
+TOKEN=$(awk '$6 == "XSRF-TOKEN" { print $7 }' cookies.txt)
+curl -s -b cookies.txt -c cookies.txt -H "X-XSRF-TOKEN: $TOKEN" -X POST -o /dev/null -w "%{http_code}
+"   http://localhost:8080/api/auth/logout
+```
+
+Sem o token, a resposta é `403 CSRF_INVALID`.
 
 ## Testes
 
 `./mvnw verify` roda:
 
 - **Backend:** testes unitários dos validadores e do token, testes de integração com Postgres real (Testcontainers) e SMTP falso (GreenMail) cobrindo cada cenário das specs, e o teste de modularidade.
-- **Frontend:** testes das regras de validação, das máscaras, do cliente da API e das páginas de cadastro e de ativação.
+- **Frontend:** testes das regras de validação, das máscaras, do cliente da API (incluindo o envio do token anti-CSRF) e das páginas de cadastro, ativação, login e área interna.
 
 O Docker precisa estar rodando.
 
 ## Trilha OpenSpec
 
-- Change em andamento: [openspec/changes/add-user-onboarding/](openspec/changes/add-user-onboarding/). Ela contém `proposal.md`, `design.md`, `tasks.md` e as specs `user-registration` e `account-activation`.
+- Specs principais em [openspec/specs/](openspec/specs/): `user-registration` e `account-activation` (change `add-user-onboarding`, arquivada).
+- Change em andamento: [openspec/changes/add-authentication/](openspec/changes/add-authentication/). Ela contém `proposal.md`, `design.md`, `tasks.md` e a spec `authentication`.
 - Os commits seguem os grupos do `tasks.md`.
 
 ## Solução de problemas
