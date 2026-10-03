@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: demo-sdd
+  config:
+    # Variáveis locais (banco, SMTP do Gmail). Ver .env.example na raiz do projeto.
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${POSTGRES_DB:demosdd}
+    username: ${POSTGRES_USER:demosdd}
+    password: ${POSTGRES_PASSWORD:demosdd}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  mail:
+    from: ${MAIL_FROM:${MAIL_USERNAME:}}
+  activation:
+    token-ttl: PT24H

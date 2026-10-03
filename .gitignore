@@ -1,0 +1,17 @@
+# Variáveis locais (credenciais)
+.env
+
+# Maven
+target/
+
+# Frontend
+node_modules/
+frontend/node/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Claude Code (configurações locais)
+.claude/settings.local.json
