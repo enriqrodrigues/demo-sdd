@@ -73,11 +73,17 @@ public class SecurityConfig {
         return new HttpSessionSecurityContextRepository();
     }
 
-    /** Aplicada no login: novo id de sessão e novo token CSRF (D3). */
+    /**
+     * Aplicada no login: novo id de sessão e novo token CSRF (D3). Com o handler
+     * SPA, o novo token é carregado na hora e o cookie já volta na resposta do
+     * login; com o padrão, o cookie antigo seria apagado sem um novo no lugar.
+     */
     @Bean
     SessionAuthenticationStrategy sessionAuthenticationStrategy(CsrfTokenRepository csrfTokenRepository) {
+        CsrfAuthenticationStrategy csrfStrategy = new CsrfAuthenticationStrategy(csrfTokenRepository);
+        csrfStrategy.setRequestHandler(new SpaCsrfTokenRequestHandler());
         return new CompositeSessionAuthenticationStrategy(List.of(
                 new ChangeSessionIdAuthenticationStrategy(),
-                new CsrfAuthenticationStrategy(csrfTokenRepository)));
+                csrfStrategy));
     }
 }

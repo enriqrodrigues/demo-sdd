@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -13,6 +15,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import br.com.demosdd.registration.TestPayloads;
 import br.com.demosdd.support.IntegrationTest;
+
+import jakarta.servlet.http.Cookie;
 
 /**
  * Sessão do usuário (spec authentication): dados do usuário autenticado,
@@ -123,5 +127,24 @@ class SessionApiTest extends IntegrationTest {
         login(session).andExpect(status().isOk());
 
         assertThat(session.getId()).isNotEqualTo(before);
+    }
+
+    @Test
+    void tokenAntiCsrfEhRenovadoNoLogin() throws Exception {
+        postJson("/api/registrations", TestPayloads.registration(EMAIL, "529.982.247-25"))
+                .andExpect(status().isCreated());
+        markActive(EMAIL);
+
+        Cookie[] cookies = mockMvc.perform(post("/api/auth/login").with(xsrfToken("token-anterior-ao-login"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"" + EMAIL + "\", \"password\": \"Segura@123\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getCookies();
+
+        // O último Set-Cookie vale: o anterior apaga o token antigo, este traz o novo.
+        Cookie issued = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(XSRF_COOKIE))
+                .reduce((first, second) -> second).orElseThrow();
+        assertThat(issued.getValue()).isNotBlank().isNotEqualTo("token-anterior-ao-login");
+        assertThat(issued.getMaxAge()).isNotZero();
     }
 }
