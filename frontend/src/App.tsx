@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
+import ActivationPage from './activation/ActivationPage';
 import RegistrationPage from './registration/RegistrationPage';
 import RegistrationSuccessPage from './registration/RegistrationSuccessPage';
 
@@ -8,6 +9,7 @@ export default function App() {
       <Route path="/" element={<Navigate to="/cadastro" replace />} />
       <Route path="/cadastro" element={<RegistrationPage />} />
       <Route path="/cadastro/sucesso" element={<RegistrationSuccessPage />} />
+      <Route path="/ativar" element={<ActivationPage />} />
       <Route path="*" element={<Navigate to="/cadastro" replace />} />
     </Routes>
   );
