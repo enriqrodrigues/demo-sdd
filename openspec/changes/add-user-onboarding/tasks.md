@@ -54,6 +54,6 @@
 
 ## 8. Documentação e verificação integrada
 
-- [ ] 8.1 Escrever o `README.md` com pré-requisitos (JDK 21, Docker), geração da senha de app do Gmail, preenchimento do `.env`, os comandos de execução e testes, as rotas e o desenvolvimento do front com `npm run dev`. Verificar seguindo o README do zero, num clone limpo, até a aplicação no ar.
-- [ ] 8.2 Rodar `./mvnw verify` completo (front + back + modularidade). Verificar que termina com BUILD SUCCESS e sem testes ignorados.
+- [x] 8.1 Escrever o `README.md` com pré-requisitos (JDK 21, Docker), geração da senha de app do Gmail, preenchimento do `.env`, os comandos de execução e testes, as rotas e o desenvolvimento do front com `npm run dev`. Verificar seguindo o README do zero, num clone limpo, até a aplicação no ar.
+- [x] 8.2 Rodar `./mvnw verify` completo (front + back + modularidade). Verificar que termina com BUILD SUCCESS e sem testes ignorados.
 - [ ] 8.3 Fazer o teste manual ponta a ponta com Gmail real: cadastrar com um e-mail próprio, receber o e-mail, clicar no link, confirmar e ver a conta `ATIVO` no banco (`select status from users`). Repetir o mesmo link e ver "já utilizado". Registrar o resultado no PR.
