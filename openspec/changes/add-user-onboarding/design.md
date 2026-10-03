@@ -36,7 +36,7 @@ demo-sdd/
   pom.xml              parent (Java 21, Spring Boot 3.x BOM)
   mvnw / .mvn/         Maven Wrapper (não exige Maven instalado)
   database/            jar: db/migration/*.sql (Flyway) + docker-compose.yml
-  frontend/            React + Vite + TS; o build gera dist/ empacotado em META-INF/resources
+  frontend/            React + Vite + TS; o build do Vite vai direto para target/classes/META-INF/resources
   backend/             Spring Boot; depende de database e frontend (jars)
   .env.example         variáveis SMTP e do banco (o .env real fica no .gitignore)
 ```
@@ -45,7 +45,7 @@ demo-sdd/
 - **Alternativa descartada:** um repositório com front solto (`npm run dev` com proxy) e back separado. Seriam dois processos e CORS, e deixaria de ser um monolito.
 - **Alternativa descartada:** migrações dentro do backend. O banco deixaria de ser um módulo independente.
 
-O frontend entra no Maven via `frontend-maven-plugin`, que instala Node e npm localmente em `frontend/target` e roda `npm ci`, `npm test` e `npm run build`. Isso evita exigir Node instalado. Para desenvolvimento do front, `npm run dev` usa o proxy do Vite apontando `/api` para o backend.
+O frontend entra no Maven via `frontend-maven-plugin`, que instala Node e npm localmente em `frontend/node` (ignorado pelo git, preservado entre `mvn clean`) e roda `npm ci`, `npm test` e `npm run build`. Isso evita exigir Node instalado. Para desenvolvimento do front, `npm run dev` usa o proxy do Vite apontando `/api` para o backend.
 
 ### D2. Fronteiras de domínio no backend com Spring Modulith
 
@@ -69,23 +69,24 @@ users                                   activation_tokens
 -------------------------------------   ------------------------------------
 id            uuid PK                   id          uuid PK
 name          varchar(150)              user_id     uuid FK -> users ON DELETE CASCADE
-cpf           char(11)    UNIQUE        token_hash  char(64) UNIQUE (SHA-256 hex)
+cpf           varchar(11) UNIQUE        token_hash  varchar(64) UNIQUE (SHA-256 hex)
 email         varchar(254) UNIQUE       expires_at  timestamptz
 birth_date    date                      used_at     timestamptz NULL
 password_hash varchar(100)              created_at  timestamptz
 phone         varchar(11)
-cep           char(8)
+cep           varchar(8)
 street        varchar(200)
 number        varchar(20)
 complement    varchar(100) NULL
 district      varchar(100)
 city          varchar(100)
-state         char(2)
+state         varchar(2)
 status        varchar(20)  CHECK IN ('PENDENTE','ATIVO')
 created_at    timestamptz
 activated_at  timestamptz NULL
 ```
 
+- **`varchar` em vez de `char`:** os campos de tamanho fixo usam `varchar(n)`, porque `char` completa com espaços e não bate com o mapeamento `String` do Hibernate na validação do schema. O tamanho exato é garantido pela validação da aplicação.
 - **Formato dos dados gravados:** e-mail em minúsculas, então o índice único simples garante a comparação sem distinção de maiúsculas. CPF, telefone e CEP só com dígitos.
 - **Tabela de tokens separada:** permite que a funcionalidade futura de reenvio emita um novo token sem mexer em `users`.
 - **Unicidade garantida também pelo banco:** as constraints UNIQUE seguram cadastros simultâneos. Uma violação de constraint vira a mesma resposta de conflito da verificação feita antes de gravar.
@@ -154,7 +155,7 @@ Todas as respostas usam JSON. Os erros seguem o formato `ProblemDetail` (RFC 945
 
 ### D9. Frontend
 
-React 18, Vite, TypeScript e React Router, sem biblioteca de UI. CSS próprio, simples e responsivo.
+React 19, Vite, TypeScript e React Router, sem biblioteca de UI. A versão é a atual no momento da implementação; o plano original previa React 18. CSS próprio, simples e responsivo.
 
 - **Rotas:**
   - `/cadastro`: formulário;
@@ -185,7 +186,8 @@ Cada cenário das specs vira ao menos um teste com nome rastreável, por exemplo
 - **A resposta 409 por campo revela se um e-mail ou CPF já está cadastrado.** → É exigido pela RN03 e aceitável numa demo local. Fica registrado para revisão se o sistema evoluir.
 - **Regras duplicadas no front e no back podem divergir.** → Os dois lados são testados com os mesmos exemplos das specs, e o back é sempre quem decide.
 - **Testcontainers exige Docker rodando para `mvnw verify`.** → É a mesma exigência do banco local, documentada no README.
-- **Primeiro build lento,** porque o `frontend-maven-plugin` baixa o Node. → Acontece uma vez só; depois fica em cache em `frontend/target`.
+- **Primeiro build lento,** porque o `frontend-maven-plugin` baixa o Node. → Acontece uma vez só; depois fica em cache em `frontend/node`.
+- **Antivírus com inspeção de TLS (ex.: Avast Web/Mail Shield) quebra o Maven e o SMTP,** porque a JDK não confia no certificado raiz do antivírus. → O README documenta como usar o repositório de certificados do Windows (`-Djavax.net.ssl.trustStoreType=Windows-ROOT`). A configuração não vai para o repositório, porque é específica da máquina.
 - **Pendentes expirados não reaproveitados acumulam no banco.** → Impacto irrelevante localmente. Uma limpeza agendada pode entrar junto com as melhorias.
 
 ## Migration Plan
