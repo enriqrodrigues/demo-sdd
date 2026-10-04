@@ -15,8 +15,11 @@ O que já funciona:
   - Conta pendente não entra: com a senha correta, recebe a orientação de ativar a conta pelo e-mail (RN04).
   - Área interna (`/inicio`) com o nome do usuário e o botão Sair. Sem sessão, a área interna leva ao login, e a API responde 401.
   - Sessão no servidor, com cookie `HttpOnly` renovado a cada login, expiração após 30 minutos sem uso e proteção CSRF em todas as requisições que alteram estado.
-
-O perfil (RF07, RN01) virá na change `add-user-profile`.
+- Change `add-user-profile`:
+  - Página de perfil (`/perfil`), aberta pelo link "Meu perfil" da área interna, com todos os dados do usuário da sessão (RF07).
+  - Edição de telefone e endereço com as mesmas máscaras e regras de validação do cadastro, revalidadas no servidor.
+  - Nome, CPF, e-mail e data de nascimento aparecem só para leitura e a API recusa qualquer tentativa de alterá-los (RN01).
+  - O perfil é sempre o do usuário da sessão: não há como consultar ou alterar o de outra pessoa.
 
 ## Arquitetura
 
@@ -39,6 +42,7 @@ O backend se divide em módulos de domínio. O Spring Modulith verifica as front
 | `activation` | token, e-mail e ativação da conta |
 | `user` | entidade `User` e repositório |
 | `auth` | login, sessão e dados do usuário autenticado (RF06, RN04) |
+| `profile` | consulta e edição do perfil do usuário da sessão (RF07, RN01) |
 | `shared` | validadores, normalização, formato de erro da API, hash de senha e configuração de segurança (sessão, CSRF, rotas públicas) |
 
 ## Pré-requisitos
@@ -115,7 +119,8 @@ npm test           # testes (Vitest + React Testing Library)
 |---|---|
 | `/` | Leva à área interna, que leva ao login quando não há sessão |
 | `/login` | Login com e-mail e senha. Quem já tem sessão vai direto para `/inicio`. |
-| `/inicio` | Área interna: saudação pelo nome e botão Sair |
+| `/inicio` | Área interna: saudação pelo nome, link "Meu perfil" e botão Sair |
+| `/perfil` | Perfil: dados pessoais somente leitura e formulário de telefone e endereço. Sem sessão, leva ao login. |
 | `/cadastro` | Formulário de cadastro |
 | `/cadastro/sucesso` | Aviso de que o e-mail de ativação foi enviado |
 | `/ativar?token=...` | Página aberta pelo link do e-mail. A ativação só ocorre quando o usuário clica em "Ativar minha conta". |
@@ -128,14 +133,16 @@ npm test           # testes (Vitest + React Testing Library)
 | `POST /api/auth/login` `{ "email", "password" }` | `200 { "name", "email" }` + cookie de sessão | `400 VALIDATION_ERROR`, `401 INVALID_CREDENTIALS`, `403 ACCOUNT_PENDING` |
 | `POST /api/auth/logout` | `204` | — |
 | `GET /api/auth/me` | `200 { "name", "email" }` | `401 UNAUTHENTICATED` |
-| qualquer `POST` sem o token anti-CSRF | — | `403 CSRF_INVALID` |
+| `GET /api/profile` | `200` perfil (abaixo) | `401 UNAUTHENTICATED` |
+| `PUT /api/profile` `{ "phone", "cep", "street", "number", "complement", "district", "city", "state" }` | `200` perfil atualizado | `400 VALIDATION_ERROR` (inclui campos não alteráveis), `401 UNAUTHENTICATED` |
+| qualquer `POST` ou `PUT` sem o token anti-CSRF | — | `403 CSRF_INVALID` |
 
 Os erros seguem o formato `ProblemDetail` (RFC 9457), com as extensões `code` e `errors[]` (`{ field, message }`).
 
 ### Sessão e token anti-CSRF
 
 - A sessão fica **na memória** da aplicação: reiniciar a aplicação encerra todas as sessões, e o usuário precisa entrar de novo.
-- Toda requisição que altera estado (cadastro, ativação, login e logout) exige o token anti-CSRF. O servidor o emite no cookie `XSRF-TOKEN`, e o cliente o devolve no cabeçalho `X-XSRF-TOKEN`. A interface faz isso sozinha.
+- Toda requisição que altera estado (cadastro, ativação, login, logout e alteração do perfil) exige o token anti-CSRF. O servidor o emite no cookie `XSRF-TOKEN`, e o cliente o devolve no cabeçalho `X-XSRF-TOKEN`. A interface faz isso sozinha.
 
 Para chamar a API manualmente com `curl`, guarde os cookies num arquivo e envie o token no cabeçalho:
 
@@ -158,19 +165,44 @@ curl -s -b cookies.txt -c cookies.txt -H "X-XSRF-TOKEN: $TOKEN" -X POST -o /dev/
 
 Sem o token, a resposta é `403 CSRF_INVALID`.
 
+### Perfil
+
+O perfil é sempre o do usuário da sessão; não existe id de usuário na rota nem no corpo. A resposta traz `{ name, cpf, email, birthDate, phone, cep, street, number, complement, district, city, state }`, com CPF, telefone e CEP só com dígitos.
+
+O `PUT` recebe o conjunto completo dos campos editáveis, com ou sem máscara. Todos são obrigatórios, exceto `complement`, que pode ser enviado vazio para removê-lo. As regras são as do cadastro: telefone com 10 ou 11 dígitos incluindo o DDD, CEP com 8 dígitos, UF válida e os mesmos tamanhos máximos.
+
+**Campos imutáveis (RN01):** nome, CPF, e-mail e data de nascimento não podem ser alterados. Se o `PUT` trouxer qualquer um deles preenchido, a resposta é `400 VALIDATION_ERROR` com um item em `errors[]` por campo ("Este campo não pode ser alterado"), e nada é gravado. Enviá-los como `null` não conta como tentativa de alteração.
+
+Com a sessão do login acima (cookies em `cookies.txt`):
+
+```bash
+# 1. Consultar o perfil
+curl -s -b cookies.txt http://localhost:8080/api/profile
+
+# 2. Alterar telefone e endereço (o token muda a cada login, então é lido de novo)
+TOKEN=$(awk '$6 == "XSRF-TOKEN" { print $7 }' cookies.txt)
+curl -s -b cookies.txt -c cookies.txt -X PUT -H "X-XSRF-TOKEN: $TOKEN"   -H "Content-Type: application/json"   -d '{"phone": "(21) 3456-7890", "cep": "20040-020", "street": "Rua da Assembleia", "number": "10",
+       "complement": "", "district": "Centro", "city": "Rio de Janeiro", "state": "RJ"}'   http://localhost:8080/api/profile
+
+# 3. Tentar trocar o e-mail: 400, com errors[] apontando "email"
+curl -s -b cookies.txt -c cookies.txt -X PUT -H "X-XSRF-TOKEN: $TOKEN"   -H "Content-Type: application/json"   -d '{"phone": "(21) 3456-7890", "cep": "20040-020", "street": "Rua da Assembleia", "number": "10",
+       "complement": "", "district": "Centro", "city": "Rio de Janeiro", "state": "RJ",
+       "email": "outro@exemplo.com"}'   http://localhost:8080/api/profile
+```
+
 ## Testes
 
 `./mvnw verify` roda:
 
 - **Backend:** testes unitários dos validadores e do token, testes de integração com Postgres real (Testcontainers) e SMTP falso (GreenMail) cobrindo cada cenário das specs, e o teste de modularidade.
-- **Frontend:** testes das regras de validação, das máscaras, do cliente da API (incluindo o envio do token anti-CSRF) e das páginas de cadastro, ativação, login e área interna.
+- **Frontend:** testes das regras de validação, das máscaras, do cliente da API (incluindo o envio do token anti-CSRF) e das páginas de cadastro, ativação, login, área interna e perfil.
 
 O Docker precisa estar rodando.
 
 ## Trilha OpenSpec
 
-- Specs principais em [openspec/specs/](openspec/specs/): `user-registration` e `account-activation` (change `add-user-onboarding`, arquivada).
-- Change em andamento: [openspec/changes/add-authentication/](openspec/changes/add-authentication/). Ela contém `proposal.md`, `design.md`, `tasks.md` e a spec `authentication`.
+- Specs principais em [openspec/specs/](openspec/specs/): `user-registration` e `account-activation` (change `add-user-onboarding`) e `authentication` (change `add-authentication`), ambas arquivadas.
+- Change em andamento: [openspec/changes/add-user-profile/](openspec/changes/add-user-profile/). Ela contém `proposal.md`, `design.md`, `tasks.md` e a spec `user-profile`.
 - Os commits seguem os grupos do `tasks.md`.
 
 ## Solução de problemas
