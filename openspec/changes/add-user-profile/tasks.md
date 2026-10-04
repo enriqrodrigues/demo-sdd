@@ -42,7 +42,7 @@
 ## 4. Documentação e verificação integrada
 
 - [x] 4.1 Atualizar o README com a página de perfil, os endpoints `GET` e `PUT /api/profile` e a regra de campos imutáveis. Verificar executando os exemplos `curl` documentados (com sessão e token CSRF) contra a aplicação rodando.
-- [ ] 4.2 Rodar o `./mvnw verify` completo. Verificar que termina com BUILD SUCCESS e sem testes ignorados.
+- [x] 4.2 Rodar o `./mvnw verify` completo. Verificar que termina com BUILD SUCCESS e sem testes ignorados.
 - [ ] 4.3 Fazer o teste manual no navegador:
   - entrar, abrir o perfil, alterar telefone (fixo e celular) e endereço, salvar e recarregar;
   - remover o complemento;
