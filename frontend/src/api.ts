@@ -132,3 +132,46 @@ export function logout(): Promise<ApiResult<void>> {
 export function me(): Promise<ApiResult<CurrentUser>> {
   return request('GET', '/api/auth/me');
 }
+
+/** Perfil do usuário da sessão (RF07). CPF, telefone e CEP vêm só com dígitos. */
+export type Profile = {
+  name: string;
+  cpf: string;
+  email: string;
+  /** AAAA-MM-DD */
+  birthDate: string;
+  phone: string;
+  cep: string;
+  street: string;
+  number: string;
+  complement: string | null;
+  district: string;
+  city: string;
+  state: string;
+};
+
+/** Campos editáveis do perfil; o servidor aceita os valores com ou sem máscara. */
+export type ProfileUpdate = {
+  phone: string;
+  cep: string;
+  street: string;
+  number: string;
+  complement: string;
+  district: string;
+  city: string;
+  state: string;
+};
+
+/** 401 UNAUTHENTICATED quando não há sessão válida. */
+export function getProfile(): Promise<ApiResult<Profile>> {
+  return request('GET', '/api/profile');
+}
+
+/**
+ * Envia só os campos editáveis: o servidor recusa nome, CPF, e-mail e data de
+ * nascimento (RN01). 400 VALIDATION_ERROR com `errors[]`; 401 sem sessão.
+ */
+export function updateProfile(values: ProfileUpdate): Promise<ApiResult<Profile>> {
+  const { phone, cep, street, number, complement, district, city, state } = values;
+  return request('PUT', '/api/profile', { phone, cep, street, number, complement, district, city, state });
+}

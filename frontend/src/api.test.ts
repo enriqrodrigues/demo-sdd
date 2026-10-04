@@ -1,4 +1,4 @@
-import { activate, login, logout, me, register } from './api';
+import { activate, getProfile, login, logout, me, register, updateProfile, type ProfileUpdate } from './api';
 import { mockFetchNetworkError, mockFetchResponse, problem } from './test/fetchMock';
 import { TEST_XSRF_TOKEN } from './test/setup';
 
@@ -235,4 +235,99 @@ test('logout 204 é sucesso sem corpo', async () => {
   expect(url).toBe('/api/auth/logout');
   expect(init.method).toBe('POST');
   expect(init.headers).toEqual(expect.objectContaining({ 'X-XSRF-TOKEN': TEST_XSRF_TOKEN }));
+});
+
+// --- Perfil ---
+
+const PROFILE = {
+  name: 'Maria da Silva',
+  cpf: '52998224725',
+  email: 'maria@exemplo.com',
+  birthDate: '1990-05-20',
+  phone: '11987654321',
+  cep: '01310100',
+  street: 'Avenida Paulista',
+  number: '1000',
+  complement: null,
+  district: 'Bela Vista',
+  city: 'São Paulo',
+  state: 'SP',
+};
+
+const CONTACT: ProfileUpdate = {
+  phone: '(21) 3456-7890',
+  cep: '20040-020',
+  street: 'Rua da Assembleia',
+  number: '10',
+  complement: '',
+  district: 'Centro',
+  city: 'Rio de Janeiro',
+  state: 'RJ',
+};
+
+test('getProfile 200 devolve o perfil, sem token anti-CSRF', async () => {
+  const fetchMock = mockFetchResponse(200, PROFILE);
+
+  const result = await getProfile();
+
+  expect(result).toEqual({ ok: true, data: PROFILE });
+  const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(url).toBe('/api/profile');
+  expect(init.method).toBe('GET');
+  expect(init.headers).not.toHaveProperty('X-XSRF-TOKEN');
+});
+
+test('getProfile 401 UNAUTHENTICATED', async () => {
+  mockFetchResponse(401, problem(401, 'UNAUTHENTICATED', 'Faça login para continuar.'));
+
+  const result = await getProfile();
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.status).toBe(401);
+  expect(result.problem.code).toBe('UNAUTHENTICATED');
+});
+
+test('updateProfile 200 envia só telefone e endereço por PUT com o token e devolve o perfil', async () => {
+  const updated = { ...PROFILE, phone: '2134567890', cep: '20040020' };
+  const fetchMock = mockFetchResponse(200, updated);
+
+  const result = await updateProfile({ ...CONTACT, email: 'outro@exemplo.com' } as ProfileUpdate);
+
+  expect(result).toEqual({ ok: true, data: updated });
+  const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+  expect(url).toBe('/api/profile');
+  expect(init.method).toBe('PUT');
+  expect(init.headers).toEqual(expect.objectContaining({ 'X-XSRF-TOKEN': TEST_XSRF_TOKEN }));
+  expect(JSON.parse(init.body as string)).toEqual(CONTACT);
+});
+
+test('updateProfile 400 mapeia errors[] por campo', async () => {
+  mockFetchResponse(
+    400,
+    problem(400, 'VALIDATION_ERROR', 'Um ou mais campos são inválidos', [
+      { field: 'phone', message: 'O telefone deve ter 10 dígitos (fixo) ou 11 dígitos (celular), incluindo o DDD' },
+      { field: 'city', message: 'Campo obrigatório' },
+    ]),
+  );
+
+  const result = await updateProfile(CONTACT);
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.code).toBe('VALIDATION_ERROR');
+  expect(result.problem.fieldErrors).toEqual({
+    phone: ['O telefone deve ter 10 dígitos (fixo) ou 11 dígitos (celular), incluindo o DDD'],
+    city: ['Campo obrigatório'],
+  });
+});
+
+test('updateProfile 401 UNAUTHENTICATED', async () => {
+  mockFetchResponse(401, problem(401, 'UNAUTHENTICATED', 'Faça login para continuar.'));
+
+  const result = await updateProfile(CONTACT);
+
+  expect(result.ok).toBe(false);
+  if (result.ok) return;
+  expect(result.problem.status).toBe(401);
 });

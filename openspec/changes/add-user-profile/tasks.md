@@ -22,8 +22,8 @@
 
 ## 2. Validação compartilhada e API (frontend)
 
-- [ ] 2.1 Generalizar `validateField`, `validateForm` e `useFormValidation` para um subconjunto de campos e valores iniciais, e exportar `CONTACT_FIELDS`. Verificar que os testes existentes do cadastro continuam passando sem alteração, e acrescentar testes de `validateForm` só com os campos de contato.
-- [ ] 2.2 Adicionar `getProfile()` e `updateProfile(values)` ao `api.ts`. Verificar com testes Vitest: 200, 400 com `errors[]` por campo, 401 e envio do cabeçalho CSRF no PUT.
+- [x] 2.1 Generalizar `validateField`, `validateForm` e `useFormValidation` para um subconjunto de campos e valores iniciais, e exportar `CONTACT_FIELDS`. Verificar que os testes existentes do cadastro continuam passando sem alteração, e acrescentar testes de `validateForm` só com os campos de contato.
+- [x] 2.2 Adicionar `getProfile()` e `updateProfile(values)` ao `api.ts`. Verificar com testes Vitest: 200, 400 com `errors[]` por campo, 401 e envio do cabeçalho CSRF no PUT.
 
 ## 3. Página de perfil (frontend)
 

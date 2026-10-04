@@ -1,5 +1,6 @@
 // Regras de validação do cadastro (RF02), espelhando o backend. O servidor
 // valida de novo e é quem decide; aqui elas servem para dar retorno imediato.
+// O perfil (RF07) reutiliza as mesmas regras para o subconjunto CONTACT_FIELDS.
 
 export const FIELDS = [
   'name',
@@ -19,7 +20,24 @@ export const FIELDS = [
 
 export type FieldName = (typeof FIELDS)[number];
 export type RegistrationValues = Record<FieldName, string>;
+/** Valores de qualquer subconjunto dos campos (ex.: só os de contato). */
+export type FormValues = Partial<Record<FieldName, string>>;
 export type FieldErrors = Partial<Record<FieldName, string>>;
+
+/** Campos editáveis no perfil: telefone e endereço. */
+export const CONTACT_FIELDS = [
+  'phone',
+  'cep',
+  'street',
+  'number',
+  'complement',
+  'district',
+  'city',
+  'state',
+] as const satisfies readonly FieldName[];
+
+export type ContactField = (typeof CONTACT_FIELDS)[number];
+export type ContactValues = Record<ContactField, string>;
 
 export const REQUIRED = 'Campo obrigatório';
 
@@ -116,7 +134,7 @@ export function todayIso(now: Date = new Date()): string {
 // --- Validação por campo ---
 
 /** Mensagem de erro do campo, ou `undefined` se o valor é válido. */
-export function validateField(field: FieldName, values: RegistrationValues, today = todayIso()): string | undefined {
+export function validateField(field: FieldName, values: FormValues, today = todayIso()): string | undefined {
   const raw = values[field] ?? '';
   const value = field === 'password' ? raw : raw.trim();
 
@@ -152,9 +170,14 @@ export function validateField(field: FieldName, values: RegistrationValues, toda
   }
 }
 
-export function validateForm(values: RegistrationValues, today = todayIso()): FieldErrors {
+/** Valida os campos informados (por padrão, todos os do cadastro). */
+export function validateForm(
+  values: FormValues,
+  today = todayIso(),
+  fields: readonly FieldName[] = FIELDS,
+): FieldErrors {
   const errors: FieldErrors = {};
-  for (const field of FIELDS) {
+  for (const field of fields) {
     const error = validateField(field, values, today);
     if (error) errors[field] = error;
   }

@@ -1,4 +1,5 @@
 import {
+  CONTACT_FIELDS,
   EMPTY_VALUES,
   REQUIRED,
   isValidCpf,
@@ -6,6 +7,7 @@ import {
   todayIso,
   validateField,
   validateForm,
+  type ContactValues,
   type RegistrationValues,
 } from './validation';
 
@@ -147,5 +149,41 @@ describe('endereço', () => {
   test('complemento é opcional mas tem tamanho máximo', () => {
     expect(withValue('complement', '')).toBeUndefined();
     expect(withValue('complement', 'x'.repeat(101))).toBe('Máximo de 100 caracteres');
+  });
+});
+
+describe('subconjunto de campos (perfil)', () => {
+  const CONTACT: ContactValues = {
+    phone: '(21) 3456-7890',
+    cep: '20040-020',
+    street: 'Rua da Assembleia',
+    number: '10',
+    complement: '',
+    district: 'Centro',
+    city: 'Rio de Janeiro',
+    state: 'RJ',
+  };
+
+  test('CONTACT_FIELDS tem telefone e endereço, sem dados pessoais nem senha', () => {
+    expect([...CONTACT_FIELDS]).toEqual(['phone', 'cep', 'street', 'number', 'complement', 'district', 'city', 'state']);
+  });
+
+  test('contato válido não tem erros, sem cobrar os campos do cadastro', () => {
+    expect(validateForm(CONTACT, TODAY, CONTACT_FIELDS)).toEqual({});
+  });
+
+  test('contato vazio aponta só os campos de contato obrigatórios', () => {
+    const empty = Object.fromEntries(CONTACT_FIELDS.map((field) => [field, ''])) as ContactValues;
+    const errors = validateForm(empty, TODAY, CONTACT_FIELDS);
+    expect(Object.keys(errors).sort()).toEqual(['cep', 'city', 'district', 'number', 'phone', 'state', 'street']);
+    expect(errors.city).toBe(REQUIRED);
+  });
+
+  test('contato inválido usa as mesmas regras do cadastro', () => {
+    const errors = validateForm({ ...CONTACT, phone: '(21) 3456-789', cep: '2004002' }, TODAY, CONTACT_FIELDS);
+    expect(errors).toEqual({
+      phone: 'O telefone deve ter 10 dígitos (fixo) ou 11 dígitos (celular), incluindo o DDD',
+      cep: 'O CEP deve ter 8 dígitos',
+    });
   });
 });
