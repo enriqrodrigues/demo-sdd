@@ -201,8 +201,8 @@ O Docker precisa estar rodando.
 
 ## Trilha OpenSpec
 
-- Specs principais em [openspec/specs/](openspec/specs/): `user-registration` e `account-activation` (change `add-user-onboarding`) e `authentication` (change `add-authentication`), ambas arquivadas.
-- Change em andamento: [openspec/changes/add-user-profile/](openspec/changes/add-user-profile/). Ela contém `proposal.md`, `design.md`, `tasks.md` e a spec `user-profile`.
+- Specs principais em [openspec/specs/](openspec/specs/): `user-registration` e `account-activation` (change `add-user-onboarding`), `authentication` (change `add-authentication`) e `user-profile` (change `add-user-profile`).
+- As três changes estão arquivadas em [openspec/changes/archive/](openspec/changes/archive/), cada uma com `proposal.md`, `design.md`, `tasks.md` e a spec delta. Não há change em andamento.
 - Os commits seguem os grupos do `tasks.md`.
 
 ## Solução de problemas
