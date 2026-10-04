@@ -173,3 +173,51 @@ a.button {
   display: inline-block;
   text-decoration: none;
 }
+
+.button--secondary {
+  color: var(--primary);
+  background: #fff;
+  border: 1px solid var(--primary);
+}
+
+.button--secondary:hover:not(:disabled) {
+  color: #fff;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.profile-data {
+  margin-bottom: 1.5rem;
+}
+
+.profile-data h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+.profile-data dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.profile-data dt {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.profile-data dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-note {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0.75rem 0 0;
+}

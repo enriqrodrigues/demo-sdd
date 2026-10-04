@@ -65,3 +65,34 @@ test('a rota raiz leva à área interna', async () => {
 
   expect(await screen.findByRole('heading', { name: 'Olá, Maria da Silva!' })).toBeInTheDocument();
 });
+
+test('a área interna oferece o link para o perfil', async () => {
+  mockApi({
+    'GET /api/auth/me': { status: 200, body: USER },
+    'GET /api/profile': {
+      status: 200,
+      body: {
+        ...USER,
+        cpf: '52998224725',
+        birthDate: '1990-05-20',
+        phone: '11987654321',
+        cep: '01310100',
+        street: 'Avenida Paulista',
+        number: '1000',
+        complement: null,
+        district: 'Bela Vista',
+        city: 'São Paulo',
+        state: 'SP',
+      },
+    },
+  });
+  const user = userEvent.setup();
+  renderApp('/inicio');
+
+  const link = await screen.findByRole('link', { name: 'Meu perfil' });
+  expect(link).toHaveAttribute('href', '/perfil');
+
+  await user.click(link);
+
+  expect(await screen.findByRole('heading', { name: 'Meu perfil' })).toBeInTheDocument();
+});

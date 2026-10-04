@@ -27,17 +27,17 @@
 
 ## 3. Página de perfil (frontend)
 
-- [ ] 3.1 Implementar a `/perfil` dentro de `RequireAuth`: dados pessoais somente leitura (CPF com máscara, data em `dd/mm/aaaa`) e formulário de contato e endereço preenchido com máscaras, validação em tempo real e select de UF. Verificar com testes React Testing Library:
+- [x] 3.1 Implementar a `/perfil` dentro de `RequireAuth`: dados pessoais somente leitura (CPF com máscara, data em `dd/mm/aaaa`) e formulário de contato e endereço preenchido com máscaras, validação em tempo real e select de UF. Verificar com testes React Testing Library:
   - nome, CPF, e-mail e data de nascimento não são campos editáveis;
   - o formulário vem preenchido e formatado;
   - CEP com 7 dígitos mostra erro ao sair do campo.
-- [ ] 3.2 Implementar salvar e descartar. Verificar com testes React Testing Library:
+- [x] 3.2 Implementar salvar e descartar. Verificar com testes React Testing Library:
   - sucesso mostra "Dados atualizados com sucesso." e os valores devolvidos;
   - erros do servidor aparecem nos campos;
   - descartar restaura os valores carregados;
   - 401 ao salvar leva a `/login`;
   - sem sessão, `/perfil` leva a `/login`.
-- [ ] 3.3 Adicionar o link "Meu perfil" na área interna e "Voltar ao início" no perfil. Verificar com testes React Testing Library.
+- [x] 3.3 Adicionar o link "Meu perfil" na área interna e "Voltar ao início" no perfil. Verificar com testes React Testing Library.
 
 ## 4. Documentação e verificação integrada
 

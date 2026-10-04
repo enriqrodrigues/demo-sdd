@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { logout, type CurrentUser } from '../api';
 
-/** Área interna: saudação ao usuário autenticado e opção de sair. */
+/** Área interna: saudação ao usuário autenticado, acesso ao perfil e opção de sair. */
 export default function HomePage({ user }: { user: CurrentUser }) {
   const navigate = useNavigate();
   const [leaving, setLeaving] = useState(false);
@@ -25,6 +25,9 @@ export default function HomePage({ user }: { user: CurrentUser }) {
       <h1>Olá, {user.name}!</h1>
       <p>
         Você entrou com o e-mail <strong>{user.email}</strong>.
+      </p>
+      <p>
+        <Link to="/perfil">Meu perfil</Link>
       </p>
 
       {error && (
