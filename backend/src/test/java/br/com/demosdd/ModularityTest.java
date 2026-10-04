@@ -11,7 +11,7 @@ import com.tngtech.archunit.core.importer.ImportOption;
 
 /**
  * Garante as fronteiras entre os módulos de domínio (registration, activation,
- * user, auth, shared): sem ciclos e sem acesso a pacotes internos de outro módulo.
+ * user, auth, profile, shared): sem ciclos e sem acesso a pacotes internos de outro módulo.
  */
 class ModularityTest {
 
@@ -32,7 +32,8 @@ class ModularityTest {
         noClasses().that().resideInAPackage("br.com.demosdd.shared..")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "br.com.demosdd.auth..", "br.com.demosdd.user..",
-                        "br.com.demosdd.registration..", "br.com.demosdd.activation..")
+                        "br.com.demosdd.registration..", "br.com.demosdd.activation..",
+                        "br.com.demosdd.profile..")
                 .check(classes);
     }
 }

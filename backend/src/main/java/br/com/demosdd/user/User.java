@@ -87,6 +87,15 @@ public class User {
         this.activatedAt = now;
     }
 
+    /**
+     * Atualiza o contato pelo perfil (RF07): troca o telefone e o endereço inteiro.
+     * Nome, CPF, e-mail e data de nascimento não têm forma de alteração (RN01).
+     */
+    public void updateContact(String phone, Address address) {
+        this.phone = phone;
+        this.address = address;
+    }
+
     public UUID getId() {
         return id;
     }

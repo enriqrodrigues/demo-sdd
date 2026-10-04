@@ -6,19 +6,19 @@
 
 ## 1. Perfil no backend
 
-- [ ] 1.1 Adicionar `User.updateContact(phone, address)`, que altera só o telefone e o endereço. Verificar com um teste unitário: nome, CPF, e-mail e data de nascimento permanecem iguais depois da chamada.
-- [ ] 1.2 Criar o módulo `profile` com `ProfileResponse` e `GET /api/profile` (usuário carregado pelo `id` do `AuthenticatedUser`). Confirmar que `AuthenticatedUser` é API pública do módulo `auth` (design D1). Verificar com testes de integração: 200 com todos os dados do usuário logado; 401 sem sessão.
-- [ ] 1.3 Criar o `ProfileUpdateRequest`: campos editáveis normalizados e validados como no cadastro, e `name`, `cpf`, `email` e `birthDate` como `Object` com `@Null` (design D3). Criar também o `PUT /api/profile` transacional. Verificar com testes de integração:
+- [x] 1.1 Adicionar `User.updateContact(phone, address)`, que altera só o telefone e o endereço. Verificar com um teste unitário: nome, CPF, e-mail e data de nascimento permanecem iguais depois da chamada.
+- [x] 1.2 Criar o módulo `profile` com `ProfileResponse` e `GET /api/profile` (usuário carregado pelo `id` do `AuthenticatedUser`). Confirmar que `AuthenticatedUser` é API pública do módulo `auth` (design D1). Verificar com testes de integração: 200 com todos os dados do usuário logado; 401 sem sessão.
+- [x] 1.3 Criar o `ProfileUpdateRequest`: campos editáveis normalizados e validados como no cadastro, e `name`, `cpf`, `email` e `birthDate` como `Object` com `@Null` (design D3). Criar também o `PUT /api/profile` transacional. Verificar com testes de integração:
   - alteração válida (telefone `(21) 3456-7890` e CEP `20040-020` gravados como `2134567890` e `20040020`, com o perfil devolvido atualizado);
   - remoção do complemento;
   - telefone `(21) 3456-789` recusado sem gravar nada;
   - cidade vazia recusada.
-- [ ] 1.4 Cobrir a RN01 e o isolamento. Verificar com testes de integração:
+- [x] 1.4 Cobrir a RN01 e o isolamento. Verificar com testes de integração:
   - o PUT com novo e-mail recebe 400 com `errors[]` apontando `email`, e nada é gravado;
   - o PUT com nome, CPF e data de nascimento aponta os três campos;
   - dois usuários em sessões diferentes veem e alteram só os próprios dados;
   - o PUT sem sessão recebe 401, e sem token CSRF recebe 403.
-- [ ] 1.5 Verificar as fronteiras: o `ApplicationModules.verify()` passa com `profile` dependendo de `user`, `shared` e `auth`, sem ciclos.
+- [x] 1.5 Verificar as fronteiras: o `ApplicationModules.verify()` passa com `profile` dependendo de `user`, `shared` e `auth`, sem ciclos.
 
 ## 2. Validação compartilhada e API (frontend)
 
