@@ -6,6 +6,12 @@ import type { Prioridade, Tarefa, TarefaInput } from '../tipos';
 type CampoFormulario = 'titulo' | 'descricao' | 'dataVencimento' | 'prioridade';
 type ErrosCampos = Partial<Record<CampoFormulario, string>>;
 
+const CAMPOS_FORMULARIO: string[] = ['titulo', 'descricao', 'dataVencimento', 'prioridade'];
+
+/**
+ * O formulário lê os valores iniciais só na montagem. O pai deve renderizar com
+ * key={tarefa?.id ?? 'nova'} para recarregar os campos quando a tarefa em edição mudar.
+ */
 interface Props {
   tarefaEmEdicao: Tarefa | null;
   onSalvar: (dados: TarefaInput) => Promise<void>;
@@ -66,7 +72,11 @@ export function TarefaForm({ tarefaEmEdicao, onSalvar, onCancelar }: Props) {
       }
     } catch (erro) {
       if (erro instanceof ErroApi && erro.erros.length > 0) {
-        setErros(Object.fromEntries(erro.erros.map((e) => [e.campo, e.mensagem])) as ErrosCampos);
+        const camposConhecidos = erro.erros.filter((e) => CAMPOS_FORMULARIO.includes(e.campo));
+        setErros(Object.fromEntries(camposConhecidos.map((e) => [e.campo, e.mensagem])) as ErrosCampos);
+        if (camposConhecidos.length < erro.erros.length) {
+          setErroGeral(erro.detail);
+        }
       } else {
         setErroGeral(erro instanceof ErroApi ? erro.detail : 'Erro inesperado ao salvar.');
       }

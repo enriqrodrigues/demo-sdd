@@ -110,6 +110,19 @@ describe('TarefaForm', () => {
     expect(screen.getByLabelText('Título')).toHaveValue('Estudar');
   });
 
+  it('mostra o detalhe do erro quando o backend retorna campo desconhecido', async () => {
+    const onSalvar = vi.fn().mockRejectedValue(
+      new ErroApi(400, 'Um ou mais campos são inválidos.', [{ campo: 'status', mensagem: 'é obrigatório' }]),
+    );
+    render(<TarefaForm tarefaEmEdicao={null} onSalvar={onSalvar} onCancelar={vi.fn()} />);
+    await userEvent.type(screen.getByLabelText('Título'), 'Estudar');
+    preencherVencimento('2026-10-20');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Adicionar tarefa' }));
+
+    expect(await screen.findByText('Um ou mais campos são inválidos.')).toBeInTheDocument();
+  });
+
   it('mostra erro geral quando o backend falha sem erros de campo', async () => {
     const onSalvar = vi.fn().mockRejectedValue(new ErroApi(500, 'Ocorreu um erro inesperado.'));
     render(<TarefaForm tarefaEmEdicao={null} onSalvar={onSalvar} onCancelar={vi.fn()} />);
