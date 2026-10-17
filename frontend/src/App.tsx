@@ -62,7 +62,13 @@ export function App() {
 
   function alternarStatus(tarefa: Tarefa) {
     const novoStatus: StatusTarefa = tarefa.status === 'PENDENTE' ? 'CONCLUIDA' : 'PENDENTE';
-    void executar(() => tarefasApi.atualizar(tarefa.id, comStatus(tarefa, novoStatus)));
+    void executar(async () => {
+      const atualizada = await tarefasApi.atualizar(tarefa.id, comStatus(tarefa, novoStatus));
+      // Mantém o formulário em sincronia: o key (id) não muda, então as edições em andamento são preservadas.
+      if (emEdicao?.id === tarefa.id) {
+        setEmEdicao(atualizada);
+      }
+    });
   }
 
   function excluir(tarefa: Tarefa) {

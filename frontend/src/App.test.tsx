@@ -121,6 +121,18 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByRole('button', { name: 'Adicionar tarefa' })).toBeInTheDocument());
   });
 
+  it('mantém o formulário sincronizado quando a tarefa em edição é concluída', async () => {
+    render(<App />);
+    await screen.findByText('Pagar boleto');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Editar' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Concluir' }));
+    await waitFor(() => expect(api.listar).toHaveBeenCalledTimes(2));
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }));
+
+    expect(api.atualizar).toHaveBeenLastCalledWith('1', expect.objectContaining({ status: 'CONCLUIDA' }));
+  });
+
   it('mostra banner quando o servidor não responde', async () => {
     api.listar.mockRejectedValue(new ErroApi(0, 'Não foi possível conectar ao servidor.'));
     render(<App />);
