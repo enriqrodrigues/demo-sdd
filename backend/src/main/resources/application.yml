@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: todo-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/todo}
+    username: ${DB_USER:todo}
+    password: ${DB_PASSWORD:todo}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
