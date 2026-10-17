@@ -46,6 +46,15 @@ public class TarefaService {
         return repository.save(tarefa);
     }
 
+    public Tarefa atualizar(UUID id, TarefaRequest dados) {
+        Tarefa tarefa = buscar(id);
+        tarefa.atualizarDados(dados.titulo(), dados.descricao(), dados.dataVencimento(), dados.prioridade());
+        if (dados.status() != tarefa.getStatus()) {
+            tarefa.alterarStatus(dados.status(), hoje());
+        }
+        return tarefa;
+    }
+
     public void excluir(UUID id) {
         repository.delete(buscar(id));
     }
