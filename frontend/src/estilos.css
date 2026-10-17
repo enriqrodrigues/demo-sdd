@@ -1,0 +1,112 @@
+:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1f2933;
+  background: #f5f7fa;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+.banner-erro {
+  background: #fde8e8;
+  color: #9b1c1c;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.score-card,
+.tarefa-form {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.score-card h2,
+.tarefa-form h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.score-semana {
+  color: #52606d;
+  font-size: 0.9rem;
+  margin: 4px 0 0;
+}
+
+.tarefa-form {
+  display: grid;
+  gap: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.erro-campo {
+  color: #c81e1e;
+  font-size: 0.85rem;
+}
+
+.acoes-form,
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #e4e7eb;
+}
+
+.lista-vazia {
+  color: #52606d;
+}
+
+.selo {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.selo-atrasada {
+  background: #c81e1e;
+}
+
+.selo-para_hoje {
+  background: #d97706;
+}
+
+.selo-no_prazo {
+  background: #2563eb;
+}
+
+.selo-concluida {
+  background: #16a34a;
+}
