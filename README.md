@@ -20,12 +20,16 @@ JDK 21 ou mais recente, Node 20 ou mais recente, e Docker Desktop.
 ```bash
 # 1. Banco
 docker compose -f database/docker-compose.yml up -d
+```
 
-# 2. Backend (http://localhost:8080)
+```bash
+# 2. Backend (http://localhost:8080) — a partir da raiz do repositório
 cd backend
 ./mvnw spring-boot:run
+```
 
-# 3. Frontend (http://localhost:5173)
+```bash
+# 3. Frontend (http://localhost:5173) — em outro terminal, a partir da raiz do repositório
 cd frontend
 npm install
 npm run dev
@@ -36,8 +40,9 @@ Variáveis opcionais do backend: `DB_URL` (padrão `jdbc:postgresql://localhost:
 ## Testes
 
 ```bash
-cd backend && ./mvnw verify   # unitários + integração (Testcontainers; requer Docker)
-cd frontend && npm test       # Vitest + Testing Library
+# a partir da raiz do repositório
+(cd backend && ./mvnw verify)   # unitários + integração (Testcontainers; requer Docker)
+(cd frontend && npm test)       # Vitest + Testing Library
 ```
 
 ## API
