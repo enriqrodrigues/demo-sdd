@@ -69,7 +69,7 @@ Em `TarefaLista.tsx`, adicione `<th>Conclusão</th>` depois de `<th>Vencimento</
 Run: `cd frontend && npm test && npm run build`
 Expected: `Tests 38 passed (38)`, e o build termina com `✓ built`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add docs/superpowers/specs/2026-10-17-coluna-data-conclusao-design.md \
