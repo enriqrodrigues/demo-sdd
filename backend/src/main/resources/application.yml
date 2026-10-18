@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: todo-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/todo
+    username: todo
+    password: todo
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      # sem isto, "prioridade": 1 seria aceito como MEDIA
+      fail-on-numbers-for-enums: true
+
+app:
+  fuso: America/Sao_Paulo
