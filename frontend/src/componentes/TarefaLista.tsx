@@ -27,6 +27,7 @@ export function TarefaLista({ tarefas, onEditar, onAlternarStatus, onExcluir }: 
           <th>Título</th>
           <th>Prioridade</th>
           <th>Vencimento</th>
+          <th>Conclusão</th>
           <th>Situação</th>
           <th>Ações</th>
         </tr>
@@ -37,6 +38,7 @@ export function TarefaLista({ tarefas, onEditar, onAlternarStatus, onExcluir }: 
             <td>{tarefa.titulo}</td>
             <td>{ROTULOS_PRIORIDADE[tarefa.prioridade]}</td>
             <td>{formatarData(tarefa.dataVencimento)}</td>
+            <td>{tarefa.dataConclusao ? formatarData(tarefa.dataConclusao) : '-'}</td>
             <td>
               <SeloSituacao situacao={tarefa.situacao} />
             </td>

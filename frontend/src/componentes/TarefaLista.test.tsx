@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Tarefa } from '../tipos';
@@ -41,6 +41,15 @@ describe('TarefaLista', () => {
     expect(screen.getByText('Média')).toBeInTheDocument();
     expect(screen.getByText('16/10/2026')).toBeInTheDocument();
     expect(screen.getByText('Para Hoje')).toHaveClass('selo-para_hoje');
+  });
+
+  it('mostra a data de conclusão formatada ou "-" se não concluída', () => {
+    renderizar([pendente, concluida]);
+
+    expect(screen.getByRole('columnheader', { name: 'Conclusão' })).toBeInTheDocument();
+    const [, linhaPendente, linhaConcluida] = screen.getAllByRole('row');
+    expect(within(linhaPendente).getByRole('cell', { name: '-' })).toBeInTheDocument();
+    expect(within(linhaConcluida).getByRole('cell', { name: '15/10/2026' })).toBeInTheDocument();
   });
 
   it('oferece Concluir para pendente', async () => {
