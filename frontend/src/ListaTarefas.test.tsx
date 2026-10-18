@@ -56,6 +56,36 @@ describe('ListaTarefas', () => {
     expect(screen.queryByRole('list')).not.toBeInTheDocument()
   })
 
+  it('exibe a data de conclusão de uma tarefa concluída', () => {
+    renderizar([tarefa({ ...comprarPao, dataVencimento: '2026-10-15', dataConclusao: '2026-10-17' })])
+
+    const item = screen.getByRole('listitem')
+    expect(item).toHaveTextContent('Vence em 15/10/2026')
+    expect(item).toHaveTextContent('Concluída em 17/10/2026')
+  })
+
+  it('não exibe data de conclusão em tarefa pendente', () => {
+    renderizar([pagarConta])
+
+    expect(screen.queryByText(/Concluída em/)).not.toBeInTheDocument()
+  })
+
+  it('deixa de exibir a data de conclusão quando a tarefa é reaberta', () => {
+    const { rerender } = renderizar([comprarPao])
+    expect(screen.getByText('Concluída em 18/10/2026')).toBeInTheDocument()
+
+    // depois da recarga, a tarefa vem pendente da API
+    rerender(
+      <ListaTarefas
+        tarefas={[{ ...comprarPao, status: 'PENDENTE', dataConclusao: null, situacaoPrazo: 'NO_PRAZO' }]}
+        onAlternarStatus={vi.fn()}
+        onEditar={vi.fn()}
+        onExcluir={vi.fn()}
+      />,
+    )
+    expect(screen.queryByText(/Concluída em/)).not.toBeInTheDocument()
+  })
+
   it('marcar uma tarefa pendente pede a conclusão', async () => {
     const { onAlternarStatus, rerender } = renderizar([pagarConta])
 

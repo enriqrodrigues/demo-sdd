@@ -38,6 +38,9 @@ export function ListaTarefas({ tarefas, onAlternarStatus, onEditar, onExcluir }:
                   Prioridade {ROTULO_PRIORIDADE[tarefa.prioridade]}
                 </span>
                 <span>Vence em {formatarData(tarefa.dataVencimento)}</span>
+                {concluida && tarefa.dataConclusao && (
+                  <span>Concluída em {formatarData(tarefa.dataConclusao)}</span>
+                )}
               </span>
             </div>
             <span className={`selo selo-${tarefa.situacaoPrazo.toLowerCase()}`}>
