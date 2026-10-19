@@ -5,6 +5,7 @@ import {
   consultarTarefa,
   criarTarefa,
   editarTarefa,
+  excluirTarefa,
   listarTarefas,
   reabrirTarefa,
   type DadosTarefa,
@@ -104,5 +105,26 @@ export function useTarefas() {
     [operar, recarregar],
   )
 
-  return { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa, emOperacao, alternarConclusao }
+  const excluir = useCallback(
+    (tarefa: Tarefa) =>
+      operar(tarefa.id, async () => {
+        await excluirTarefa(tarefa.id)
+        setTarefas((lista) => lista?.filter((t) => t.id !== tarefa.id) ?? null)
+        recarregar()
+      }),
+    [operar, recarregar],
+  )
+
+  return {
+    tarefas,
+    filtro,
+    setFiltro,
+    score,
+    criar,
+    editar,
+    recarregarTarefa,
+    emOperacao,
+    alternarConclusao,
+    excluir,
+  }
 }

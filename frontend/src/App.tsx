@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ErroConflito, type DadosTarefa, type Tarefa } from './api'
 import { CabecalhoScore } from './componentes/CabecalhoScore'
+import { DialogoConfirmacao } from './componentes/DialogoConfirmacao'
 import { Filtros } from './componentes/Filtros'
 import { FormularioTarefa } from './componentes/FormularioTarefa'
 import { ListaTarefas } from './componentes/ListaTarefas'
@@ -26,9 +27,27 @@ function dadosDa(tarefa: Tarefa): DadosTarefa {
 }
 
 export default function App() {
-  const { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa, emOperacao, alternarConclusao } =
-    useTarefas()
+  const {
+    tarefas,
+    filtro,
+    setFiltro,
+    score,
+    criar,
+    editar,
+    recarregarTarefa,
+    emOperacao,
+    alternarConclusao,
+    excluir,
+  } = useTarefas()
   const [formulario, setFormulario] = useState<EstadoFormulario>({ modo: 'fechado' })
+  const [paraExcluir, setParaExcluir] = useState<Tarefa | null>(null)
+
+  function confirmarExclusao() {
+    if (paraExcluir) {
+      excluir(paraExcluir)
+      setParaExcluir(null)
+    }
+  }
   const fechar = () => setFormulario({ modo: 'fechado' })
 
   async function salvarNova(dados: DadosTarefa) {
@@ -90,9 +109,22 @@ export default function App() {
             emOperacao={emOperacao}
             aoEditar={(tarefa) => setFormulario({ modo: 'editar', tarefa })}
             aoAlternarConclusao={alternarConclusao}
+            aoExcluir={setParaExcluir}
           />
         )}
       </main>
+      {paraExcluir && (
+        <DialogoConfirmacao
+          titulo="Excluir tarefa?"
+          rotuloConfirmar="Excluir"
+          aoConfirmar={confirmarExclusao}
+          aoCancelar={() => setParaExcluir(null)}
+        >
+          <p>
+            A tarefa <strong>{paraExcluir.titulo}</strong> será excluída definitivamente.
+          </p>
+        </DialogoConfirmacao>
+      )}
     </div>
   )
 }
