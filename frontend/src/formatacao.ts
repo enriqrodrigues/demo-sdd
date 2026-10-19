@@ -6,6 +6,19 @@ export function formatarData(iso: string): string {
   return `${dia}/${mes}/${ano}`
 }
 
+/** "2026-10-19" → "19/10". */
+export function formatarDiaMes(iso: string): string {
+  const [, mes, dia] = iso.split('-')
+  return `${dia}/${mes}`
+}
+
+const PERCENTUAL = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
+
+/** 66.67 → "66,67%"; 100 → "100%". */
+export function formatarPercentual(valor: number): string {
+  return `${PERCENTUAL.format(valor)}%`
+}
+
 export const ROTULO_PRIORIDADE: Record<Prioridade, string> = {
   ALTA: 'Alta',
   MEDIA: 'Média',

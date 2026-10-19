@@ -117,3 +117,32 @@ body {
   border-color: var(--azul);
   color: #fff;
 }
+
+.cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.score {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: baseline;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+.score-percentual {
+  font-size: 1.4rem;
+  color: var(--verde);
+}
+
+.score-periodo {
+  color: var(--cinza);
+  font-size: 0.85rem;
+}
