@@ -49,4 +49,4 @@ Convenção: em cada tarefa, o teste indicado em **Verificação** é escrito e 
 
 ## 6. Integração
 
-- [ ] 6.1 Verificar o sistema montado: banco via compose, backend com as variáveis de ambiente e frontend via `npm run dev`, exercitando no navegador criar, editar, concluir, reabrir, filtrar, excluir e o conflito de edição entre duas abas, conferindo o score no cabeçalho. Scenarios: verificação integrada dos fluxos de `interface-web` contra a API real. **Verificação:** roteiro executado manualmente (ou com `playwright-core` no Chrome do sistema), com `mvn verify`, `npm test`, `npm run build`, `npm run lint` e `npm audit` sem falhas.
+- [x] 6.1 Verificar o sistema montado: banco via compose, backend com as variáveis de ambiente e frontend via `npm run dev`, exercitando no navegador criar, editar, concluir, reabrir, filtrar, excluir e o conflito de edição entre duas abas, conferindo o score no cabeçalho. Scenarios: verificação integrada dos fluxos de `interface-web` contra a API real. **Verificação:** roteiro executado manualmente (ou com `playwright-core` no Chrome do sistema), com `mvn verify`, `npm test`, `npm run build`, `npm run lint` e `npm audit` sem falhas.
