@@ -33,8 +33,24 @@ public class RelogioTeste extends Clock {
         return ZoneOffset.UTC;
     }
 
+    /** Como em qualquer {@link Clock}: mesmo instante (mutável), outro fuso. */
     @Override
     public Clock withZone(ZoneId zone) {
-        throw new UnsupportedOperationException("Use o ZoneId configurado da aplicação");
+        return new Clock() {
+            @Override
+            public Instant instant() {
+                return agora;
+            }
+
+            @Override
+            public ZoneId getZone() {
+                return zone;
+            }
+
+            @Override
+            public Clock withZone(ZoneId outroFuso) {
+                return RelogioTeste.this.withZone(outroFuso);
+            }
+        };
     }
 }

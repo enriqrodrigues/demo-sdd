@@ -46,4 +46,14 @@ class MigracaoIT extends TesteIntegracao {
                 .isInstanceOf(DataIntegrityViolationException.class)
                 .hasMessageContaining("ck_tarefa_prioridade");
     }
+
+    @Test
+    void statusForaDoEnumViolaConstraint() {
+        assertThatThrownBy(() -> jdbc.update("""
+                insert into tarefa (id, titulo, data_vencimento, prioridade, status, concluida_em, version)
+                values (gen_random_uuid(), 'X', date '2026-10-20', 'ALTA', 'ATRASADA', null, 0)
+                """))
+                .isInstanceOf(DataIntegrityViolationException.class)
+                .hasMessageContaining("ck_tarefa_status");
+    }
 }

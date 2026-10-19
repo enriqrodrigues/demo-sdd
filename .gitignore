@@ -2,3 +2,8 @@
 target/
 node_modules/
 dist/
+
+# IDEs
+.idea/
+*.iml
+.vscode/

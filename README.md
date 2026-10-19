@@ -36,7 +36,7 @@ Propriedades opcionais do backend (passadas como argumento, ex.: `--app.fuso-hor
 
 ## Subindo o sistema
 
-Os exemplos usam PowerShell; em bash, troque `$env:VAR="valor"` por `export VAR=valor` e `.\mvnw.cmd` por `./mvnw`.
+Os exemplos usam PowerShell e partem da raiz do repositório; em bash, troque `$env:VAR="valor"` por `export VAR=valor` e `.\mvnw.cmd` por `./mvnw`. Backend e frontend ficam em execução, então use um terminal para cada um.
 
 ### 1. Banco de dados
 
@@ -71,15 +71,15 @@ Em desenvolvimento, o Vite encaminha `/api` para o backend.
 
 ## Testes e verificações
 
-```powershell
-# backend: unitários (sem Docker)
-cd backend; .\mvnw.cmd test
+A partir da raiz do repositório:
 
-# backend: unitários + integração (Testcontainers; precisa do Docker Desktop)
-cd backend; .\mvnw.cmd verify
+```powershell
+# backend: unitários + integração (Testcontainers; precisa do Docker Desktop).
+# Para rodar só os unitários, sem Docker, troque "verify" por "test".
+Push-Location backend; .\mvnw.cmd verify; Pop-Location
 
 # frontend
-cd frontend; npm ci; npm test; npm run lint; npm run build; npm audit
+Push-Location frontend; npm ci; npm test; npm run lint; npm run build; npm audit; Pop-Location
 ```
 
 Os testes de integração sobem o próprio PostgreSQL em container; não dependem do banco do `database/` nem das variáveis `DB_*`.

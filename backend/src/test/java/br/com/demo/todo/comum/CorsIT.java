@@ -14,16 +14,19 @@ class CorsIT extends TesteIntegracao {
     void preflightDaOrigemDoViteEhAceito() throws Exception {
         mvc.perform(options("/api/tarefas")
                         .header("Origin", "http://localhost:5173")
-                        .header("Access-Control-Request-Method", "PUT"))
+                        .header("Access-Control-Request-Method", "PUT")
+                        .header("Access-Control-Request-Headers", "Content-Type"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"));
+                .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
+                .andExpect(header().string("Access-Control-Allow-Headers", "Content-Type"));
     }
 
     @Test
     void preflightDeOutraOrigemEhRecusado() throws Exception {
         mvc.perform(options("/api/tarefas")
                         .header("Origin", "http://evil.example")
-                        .header("Access-Control-Request-Method", "PUT"))
+                        .header("Access-Control-Request-Method", "PUT")
+                        .header("Access-Control-Request-Headers", "Content-Type"))
                 .andExpect(status().isForbidden())
                 .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
     }
