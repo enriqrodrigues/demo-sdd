@@ -1,10 +1,13 @@
 package br.com.demo.todo.tarefa;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import br.com.demo.todo.prazo.SituacaoPrazo;
 
 @Service
 public class ServicoTarefa {
@@ -26,8 +29,10 @@ public class ServicoTarefa {
     }
 
     @Transactional(readOnly = true)
-    public List<Tarefa> listar() {
-        return repositorio.findAll(ConsultasTarefa.ordenadaParaListagem());
+    public List<Tarefa> listar(StatusTarefa status, SituacaoPrazo situacaoPrazo, LocalDate hoje) {
+        return repositorio.findAll(ConsultasTarefa.ordenadaParaListagem()
+                .and(ConsultasTarefa.comStatus(status))
+                .and(ConsultasTarefa.comSituacaoPrazo(situacaoPrazo, hoje)));
     }
 
     @Transactional(readOnly = true)

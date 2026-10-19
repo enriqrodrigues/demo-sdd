@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -41,6 +43,18 @@ public class ManipuladorErros extends ResponseEntityExceptionHandler {
                 .map(erro -> new ErroCampo(erro.getField(), erro.getDefaultMessage()))
                 .toList();
         return ResponseEntity.badRequest().body(problemaDeValidacao(erros));
+    }
+
+    /** Parâmetro de caminho ou de consulta com valor inválido (UUID malformado, filtro fora do enum). */
+    @Override
+    @Nullable
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException excecao, HttpHeaders cabecalhos,
+            HttpStatusCode status, WebRequest requisicao) {
+        String campo = excecao instanceof MethodArgumentTypeMismatchException argumento
+                ? argumento.getName()
+                : excecao.getPropertyName();
+        return ResponseEntity.badRequest().body(problemaDeValidacao(
+                List.of(new ErroCampo(campo, "Valor inválido: " + excecao.getValue() + "."))));
     }
 
     /** Corpo ilegível: propriedade desconhecida ou tipo errado viram erro de campo; JSON quebrado, 400 simples. */
