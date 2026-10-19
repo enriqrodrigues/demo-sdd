@@ -13,7 +13,7 @@ Convenção: em cada tarefa, o teste indicado em **Verificação** é escrito e 
 ## 2. Regra de prazo (domínio)
 
 - [x] 2.1 Implementar `CalculadoraPrazo` como função pura `(status, dataVencimento, hoje) → SituacaoPrazo`. Scenarios: `prazo-tarefa` › Cálculo da situação de prazo (Pendente com vencimento ontem; Pendente com vencimento hoje; Pendente com vencimento amanhã; Concluída com vencimento no passado). **Verificação:** testes unitários parametrizados, um por scenario.
-- [ ] 2.2 Implementar a obtenção de "hoje" a partir do `Clock` e do fuso configurado, usada pela calculadora. Scenarios: `prazo-tarefa` › Data corrente no fuso configurado (Virada de dia em UTC antes do fuso local; Fuso configurado diferente). **Verificação:** testes unitários com `Clock.fixed(2026-10-21T01:30Z, UTC)` e fuso configurado `America/Sao_Paulo` e `UTC`.
+- [x] 2.2 Implementar a obtenção de "hoje" a partir do `Clock` e do fuso configurado, usada pela calculadora. Scenarios: `prazo-tarefa` › Data corrente no fuso configurado (Virada de dia em UTC antes do fuso local; Fuso configurado diferente). **Verificação:** testes unitários com `Clock.fixed(2026-10-21T01:30Z, UTC)` e fuso configurado `America/Sao_Paulo` e `UTC`.
 
 ## 3. API de tarefas
 
