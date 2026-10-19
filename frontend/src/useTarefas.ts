@@ -1,10 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  concluirTarefa,
   consultarScore,
   consultarTarefa,
   criarTarefa,
   editarTarefa,
   listarTarefas,
+  reabrirTarefa,
   type DadosTarefa,
   type Score,
   type Tarefa,
@@ -71,5 +73,36 @@ export function useTarefas() {
     [recarregar],
   )
 
-  return { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa }
+  const [emOperacao, setEmOperacao] = useState<ReadonlySet<string>>(new Set())
+  // O estado só reflete após renderizar; o ref barra um segundo clique no mesmo instante.
+  const operacoesAtivas = useRef(new Set<string>())
+
+  /** Executa uma ação sobre a tarefa, com o controle dela bloqueado até a resposta. */
+  const operar = useCallback(async (id: string, acao: () => Promise<void>) => {
+    if (operacoesAtivas.current.has(id)) {
+      return
+    }
+    operacoesAtivas.current.add(id)
+    setEmOperacao(new Set(operacoesAtivas.current))
+    try {
+      await acao()
+    } finally {
+      operacoesAtivas.current.delete(id)
+      setEmOperacao(new Set(operacoesAtivas.current))
+    }
+  }, [])
+
+  const alternarConclusao = useCallback(
+    (tarefa: Tarefa) =>
+      operar(tarefa.id, async () => {
+        const atualizada =
+          tarefa.status === 'CONCLUIDA' ? await reabrirTarefa(tarefa.id) : await concluirTarefa(tarefa.id)
+        setTarefas((lista) => lista?.map((t) => (t.id === atualizada.id ? atualizada : t)) ?? null)
+        // Lista (a tarefa pode sair do filtro ativo) e score são consultados de novo.
+        recarregar()
+      }),
+    [operar, recarregar],
+  )
+
+  return { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa, emOperacao, alternarConclusao }
 }

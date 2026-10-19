@@ -26,7 +26,8 @@ function dadosDa(tarefa: Tarefa): DadosTarefa {
 }
 
 export default function App() {
-  const { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa } = useTarefas()
+  const { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa, emOperacao, alternarConclusao } =
+    useTarefas()
   const [formulario, setFormulario] = useState<EstadoFormulario>({ modo: 'fechado' })
   const fechar = () => setFormulario({ modo: 'fechado' })
 
@@ -86,7 +87,9 @@ export default function App() {
           <ListaTarefas
             tarefas={tarefas}
             idEmEdicao={formulario.modo === 'editar' ? formulario.tarefa.id : undefined}
+            emOperacao={emOperacao}
             aoEditar={(tarefa) => setFormulario({ modo: 'editar', tarefa })}
+            aoAlternarConclusao={alternarConclusao}
           />
         )}
       </main>

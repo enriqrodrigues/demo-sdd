@@ -5,19 +5,21 @@ interface Props {
   tarefas: Tarefa[]
   /** Tarefa com o formulário de edição aberto: suas ações de concluir/reabrir e excluir ficam bloqueadas. */
   idEmEdicao?: string
+  /** Tarefas com requisição em andamento: suas ações ficam bloqueadas até a resposta. */
+  emOperacao?: ReadonlySet<string>
   aoEditar: (tarefa: Tarefa) => void
   aoAlternarConclusao?: (tarefa: Tarefa) => void
   aoExcluir?: (tarefa: Tarefa) => void
 }
 
-export function ListaTarefas({ tarefas, idEmEdicao, aoEditar, aoAlternarConclusao, aoExcluir }: Props) {
+export function ListaTarefas({ tarefas, idEmEdicao, emOperacao, aoEditar, aoAlternarConclusao, aoExcluir }: Props) {
   if (tarefas.length === 0) {
     return <p className="lista-vazia">Nenhuma tarefa por aqui.</p>
   }
   return (
     <ul className="lista-tarefas">
       {tarefas.map((tarefa) => {
-        const bloqueada = tarefa.id === idEmEdicao
+        const bloqueada = tarefa.id === idEmEdicao || (emOperacao?.has(tarefa.id) ?? false)
         const concluida = tarefa.status === 'CONCLUIDA'
         return (
           <li key={tarefa.id} className={`tarefa situacao-${tarefa.situacaoPrazo.toLowerCase()}`}>
