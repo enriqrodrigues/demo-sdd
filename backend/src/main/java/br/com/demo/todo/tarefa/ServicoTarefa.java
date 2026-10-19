@@ -20,7 +20,7 @@ public class ServicoTarefa {
                 requisicao.titulo(),
                 requisicao.descricao(),
                 requisicao.dataVencimentoConvertida(),
-                Prioridade.valueOf(requisicao.prioridade()));
+                requisicao.prioridadeConvertida());
         return repositorio.saveAndFlush(tarefa);
     }
 

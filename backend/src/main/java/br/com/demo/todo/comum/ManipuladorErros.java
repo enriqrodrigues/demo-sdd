@@ -2,6 +2,8 @@ package br.com.demo.todo.comum;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +41,28 @@ public class ManipuladorErros extends ResponseEntityExceptionHandler {
                 .map(erro -> new ErroCampo(erro.getField(), erro.getDefaultMessage()))
                 .toList();
         return ResponseEntity.badRequest().body(problemaDeValidacao(erros));
+    }
+
+    /** Corpo ilegível: propriedade desconhecida ou tipo errado viram erro de campo; JSON quebrado, 400 simples. */
+    @Override
+    @Nullable
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException excecao,
+            HttpHeaders cabecalhos, HttpStatusCode status, WebRequest requisicao) {
+        if (excecao.getCause() instanceof UnrecognizedPropertyException desconhecida) {
+            return ResponseEntity.badRequest().body(problemaDeValidacao(
+                    List.of(new ErroCampo(desconhecida.getPropertyName(), "Campo desconhecido."))));
+        }
+        if (excecao.getCause() instanceof JsonMappingException mapeamento && !mapeamento.getPath().isEmpty()) {
+            String campo = mapeamento.getPath().get(mapeamento.getPath().size() - 1).getFieldName();
+            if (campo != null) {
+                return ResponseEntity.badRequest().body(problemaDeValidacao(
+                        List.of(new ErroCampo(campo, "Valor em formato inválido."))));
+            }
+        }
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "O corpo da requisição não é um JSON válido.");
+        problema.setTitle("Requisição malformada");
+        return ResponseEntity.badRequest().body(problema);
     }
 
     @ExceptionHandler(Exception.class)
