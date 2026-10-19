@@ -42,7 +42,7 @@ rules:
     - A verificação de cada tarefa é um teste escrito antes do código
   specs:
     - Na UI, inclua scenarios de interação entre ações sobre a mesma entidade
-      (ex.: editar enquanto conclui)
+      (ex. editar enquanto conclui)
 
 operations:
   apply:
