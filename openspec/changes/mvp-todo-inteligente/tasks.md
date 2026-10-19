@@ -45,7 +45,7 @@ Convenção: em cada tarefa, o teste indicado em **Verificação** é escrito e 
 - [x] 5.8 Implementar concluir/reabrir na linha, com controle desabilitado durante a requisição, recarga do score e saída da tarefa do filtro ativo. Scenarios: `interface-web` › Concluir e reabrir pela interface (Concluir tarefa; Reabrir tarefa; Duplo clique em concluir); Score no cabeçalho (Score atualizado após concluir); Filtros da lista (Tarefa sai do filtro após ação). **Verificação:** testes de componente com MSW, um por scenario; o de duplo clique conta exatamente uma requisição de conclusão.
 - [x] 5.9 Implementar a exclusão com diálogo de confirmação acessível. Scenarios: `interface-web` › Excluir pela interface (Confirmar exclusão; Cancelar exclusão). **Verificação:** testes de componente com MSW, um por scenario; o de cancelar confere que nenhuma requisição `DELETE` foi recebida.
 - [x] 5.10 Tratar o 404 em edição, conclusão, reabertura e exclusão: aviso, remoção da tarefa da lista e fechamento do formulário. Scenarios: `interface-web` › Tarefa removida durante uma ação (Editar tarefa excluída em outra aba; Concluir tarefa excluída em outra aba). **Verificação:** testes de componente com MSW respondendo 404, um por scenario.
-- [ ] 5.11 Tratar erro de rede e 5xx: mensagem genérica, estado anterior mantido e controle reabilitado. Scenarios: `interface-web` › Falha de comunicação (Servidor indisponível ao concluir). **Verificação:** teste de componente com MSW simulando erro de rede.
+- [x] 5.11 Tratar erro de rede e 5xx: mensagem genérica, estado anterior mantido e controle reabilitado. Scenarios: `interface-web` › Falha de comunicação (Servidor indisponível ao concluir). **Verificação:** teste de componente com MSW simulando erro de rede.
 
 ## 6. Integração
 

@@ -29,6 +29,7 @@ function dadosDa(tarefa: Tarefa): DadosTarefa {
 export default function App() {
   const {
     tarefas,
+    falhaNaCarga,
     filtro,
     setFiltro,
     score,
@@ -116,7 +117,7 @@ export default function App() {
         )}
         <Filtros ativo={filtro} aoSelecionar={setFiltro} />
         {tarefas === null ? (
-          <p>Carregando…</p>
+          falhaNaCarga ? null : <p>Carregando…</p>
         ) : (
           <ListaTarefas
             tarefas={tarefas}

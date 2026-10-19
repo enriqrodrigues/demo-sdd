@@ -1,11 +1,15 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { ErroValidacao, type DadosTarefa, type Prioridade } from '../api'
+import { FALHA_COMUNICACAO } from '../mensagens'
 
 interface Props {
   /** Título do formulário, também usado como seu nome acessível. */
   titulo: string
   valoresIniciais: DadosTarefa
-  /** Rejeita com {@link ErroValidacao} para exibir erros por campo; outros erros ficam com quem chama. */
+  /**
+   * Rejeita com {@link ErroValidacao} para exibir erros por campo; qualquer outra rejeição vira a
+   * mensagem genérica de falha. Conflito e tarefa removida são tratados por quem chama.
+   */
   aoSalvar: (dados: DadosTarefa) => Promise<void>
   aoCancelar: () => void
   /** Aviso vindo de fora, como o de conflito de edição. */
@@ -36,7 +40,9 @@ export function FormularioTarefa({ titulo, valoresIniciais, aoSalvar, aoCancelar
       await aoSalvar(valores)
     } catch (erro) {
       if (!(erro instanceof ErroValidacao)) {
-        throw erro
+        // Rede, 5xx ou resposta inesperada: os valores digitados ficam para tentar de novo.
+        setErroGeral(FALHA_COMUNICACAO)
+        return
       }
       setErros(erro.erros)
       if (Object.keys(erro.erros).length === 0) {

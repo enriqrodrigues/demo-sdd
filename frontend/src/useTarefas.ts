@@ -5,33 +5,46 @@ import {
   consultarTarefa,
   criarTarefa,
   editarTarefa,
+  ErroConflito,
+  ErroNaoEncontrado,
   excluirTarefa,
   listarTarefas,
   reabrirTarefa,
-  ErroNaoEncontrado,
   type DadosTarefa,
   type Score,
   type Tarefa,
 } from './api'
 import { PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
+import { FALHA_COMUNICACAO, TAREFA_ALTERADA, TAREFA_REMOVIDA } from './mensagens'
 
-const AVISO_TAREFA_REMOVIDA = 'Esta tarefa não existe mais. Ela foi removida da lista.'
-
-/** Estado da tela: filtro ativo, a lista de tarefas correspondente e o score da semana. */
+/**
+ * Estado da tela: filtro ativo, lista de tarefas, score da semana, tarefas com requisição em
+ * andamento e o aviso exibido ao usuário.
+ */
 export function useTarefas() {
   const [filtro, setFiltro] = useState<Filtro>('TODAS')
   const [tarefas, setTarefas] = useState<Tarefa[] | null>(null)
   const [score, setScore] = useState<Score | null>(null)
+  const [falhaNaCarga, setFalhaNaCarga] = useState(false)
+  const [aviso, setAviso] = useState<string | null>(null)
   // Incrementar a geração faz lista e score serem consultados de novo.
   const [geracao, setGeracao] = useState(0)
 
   useEffect(() => {
     let ativo = true
-    listarTarefas(PARAMETROS_DO_FILTRO[filtro]).then((lista) => {
-      if (ativo) {
-        setTarefas(lista)
-      }
-    })
+    listarTarefas(PARAMETROS_DO_FILTRO[filtro])
+      .then((lista) => {
+        if (ativo) {
+          setTarefas(lista)
+          setFalhaNaCarga(false)
+        }
+      })
+      .catch(() => {
+        if (ativo) {
+          setFalhaNaCarga(true)
+          setAviso(FALHA_COMUNICACAO)
+        }
+      })
     return () => {
       ativo = false
     }
@@ -39,11 +52,17 @@ export function useTarefas() {
 
   useEffect(() => {
     let ativo = true
-    consultarScore().then((atual) => {
-      if (ativo) {
-        setScore(atual)
-      }
-    })
+    consultarScore()
+      .then((atual) => {
+        if (ativo) {
+          setScore(atual)
+        }
+      })
+      .catch(() => {
+        if (ativo) {
+          setAviso(FALHA_COMUNICACAO)
+        }
+      })
     return () => {
       ativo = false
     }
@@ -51,14 +70,11 @@ export function useTarefas() {
 
   const recarregar = useCallback(() => setGeracao((g) => g + 1), [])
 
-  /** Mensagem para o usuário sobre o resultado de uma ação (ex.: tarefa que não existe mais). */
-  const [aviso, setAviso] = useState<string | null>(null)
-
   /** A API respondeu 404: a tarefa foi excluída em outro lugar e sai da lista. */
   const removerInexistente = useCallback(
     (id: string) => {
       setTarefas((lista) => lista?.filter((t) => t.id !== id) ?? null)
-      setAviso(AVISO_TAREFA_REMOVIDA)
+      setAviso(TAREFA_REMOVIDA)
       recarregar()
     },
     [recarregar],
@@ -102,25 +118,35 @@ export function useTarefas() {
   // O estado só reflete após renderizar; o ref barra um segundo clique no mesmo instante.
   const operacoesAtivas = useRef(new Set<string>())
 
-  /** Executa uma ação sobre a tarefa, com o controle dela bloqueado até a resposta. */
-  const operar = useCallback(async (id: string, acao: () => Promise<void>) => {
-    if (operacoesAtivas.current.has(id)) {
-      return
-    }
-    operacoesAtivas.current.add(id)
-    setEmOperacao(new Set(operacoesAtivas.current))
-    try {
-      await acao()
-    } catch (erro) {
-      if (!(erro instanceof ErroNaoEncontrado)) {
-        throw erro
+  /**
+   * Executa uma ação sobre a tarefa com o controle dela bloqueado até a resposta. Falhas viram
+   * aviso: 404 remove a tarefa; 409 recarrega a lista; rede ou 5xx mantêm o estado exibido.
+   */
+  const operar = useCallback(
+    async (id: string, acao: () => Promise<void>) => {
+      if (operacoesAtivas.current.has(id)) {
+        return
       }
-      removerInexistente(id)
-    } finally {
-      operacoesAtivas.current.delete(id)
+      operacoesAtivas.current.add(id)
       setEmOperacao(new Set(operacoesAtivas.current))
-    }
-  }, [removerInexistente])
+      try {
+        await acao()
+      } catch (erro) {
+        if (erro instanceof ErroNaoEncontrado) {
+          removerInexistente(id)
+        } else if (erro instanceof ErroConflito) {
+          setAviso(TAREFA_ALTERADA)
+          recarregar()
+        } else {
+          setAviso(FALHA_COMUNICACAO)
+        }
+      } finally {
+        operacoesAtivas.current.delete(id)
+        setEmOperacao(new Set(operacoesAtivas.current))
+      }
+    },
+    [recarregar, removerInexistente],
+  )
 
   const alternarConclusao = useCallback(
     (tarefa: Tarefa) =>
@@ -144,8 +170,11 @@ export function useTarefas() {
     [operar, recarregar],
   )
 
+  const limparAviso = useCallback(() => setAviso(null), [])
+
   return {
     tarefas,
+    falhaNaCarga,
     filtro,
     setFiltro,
     score,
@@ -156,6 +185,6 @@ export function useTarefas() {
     alternarConclusao,
     excluir,
     aviso,
-    limparAviso: () => setAviso(null),
+    limparAviso,
   }
 }
