@@ -3,6 +3,8 @@ package br.com.demo.todo.tarefa;
 import java.net.URI;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +26,7 @@ public class TarefaController {
     }
 
     @PostMapping
-    public ResponseEntity<TarefaResposta> criar(@RequestBody NovaTarefaRequisicao requisicao) {
+    public ResponseEntity<TarefaResposta> criar(@Valid @RequestBody NovaTarefaRequisicao requisicao) {
         Tarefa tarefa = servico.criar(requisicao);
         return ResponseEntity.created(URI.create("/api/tarefas/" + tarefa.getId()))
                 .body(mapeador.paraResposta(tarefa));

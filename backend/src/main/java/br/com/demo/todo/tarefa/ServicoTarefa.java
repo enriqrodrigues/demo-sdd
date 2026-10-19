@@ -19,7 +19,7 @@ public class ServicoTarefa {
         Tarefa tarefa = Tarefa.nova(
                 requisicao.titulo(),
                 requisicao.descricao(),
-                requisicao.dataVencimento(),
+                requisicao.dataVencimentoConvertida(),
                 Prioridade.valueOf(requisicao.prioridade()));
         return repositorio.saveAndFlush(tarefa);
     }
