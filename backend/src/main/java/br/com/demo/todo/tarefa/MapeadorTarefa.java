@@ -2,7 +2,6 @@ package br.com.demo.todo.tarefa;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 
 import org.springframework.stereotype.Component;
 
@@ -14,11 +13,9 @@ import br.com.demo.todo.prazo.CalculadoraPrazo;
 public class MapeadorTarefa {
 
     private final DataCorrente dataCorrente;
-    private final ZoneId fuso;
 
-    public MapeadorTarefa(DataCorrente dataCorrente, ZoneId fuso) {
+    public MapeadorTarefa(DataCorrente dataCorrente) {
         this.dataCorrente = dataCorrente;
-        this.fuso = fuso;
     }
 
     public TarefaResposta paraResposta(Tarefa tarefa) {
@@ -29,7 +26,7 @@ public class MapeadorTarefa {
     public TarefaResposta paraResposta(Tarefa tarefa, LocalDate hoje) {
         OffsetDateTime concluidaEm = tarefa.getConcluidaEm() == null
                 ? null
-                : tarefa.getConcluidaEm().atZone(fuso).toOffsetDateTime();
+                : tarefa.getConcluidaEm().atZone(dataCorrente.fuso()).toOffsetDateTime();
         return new TarefaResposta(
                 tarefa.getId(),
                 tarefa.getTitulo(),

@@ -46,6 +46,8 @@ public record TarefaRequisicao(
     public TarefaRequisicao {
         titulo = titulo == null ? null : titulo.strip();
         descricao = descricao == null || descricao.isBlank() ? null : descricao;
+        // Um campo de data limpo no formulário chega como "": é vencimento ausente, não data malformada.
+        dataVencimento = dataVencimento == null || dataVencimento.isBlank() ? null : dataVencimento;
     }
 
     public LocalDate dataVencimentoConvertida() {

@@ -11,5 +11,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Os testes de tela digitam com user-event; com todos os núcleos ocupados eles ficavam lentos e instáveis.
+    maxWorkers: '50%',
   },
 })

@@ -6,10 +6,10 @@ interface Props {
   /** Tarefa com o formulário de edição aberto: suas ações de concluir/reabrir e excluir ficam bloqueadas. */
   idEmEdicao?: string
   /** Tarefas com requisição em andamento: suas ações ficam bloqueadas até a resposta. */
-  emOperacao?: ReadonlySet<string>
+  emOperacao: ReadonlySet<string>
   aoEditar: (tarefa: Tarefa) => void
-  aoAlternarConclusao?: (tarefa: Tarefa) => void
-  aoExcluir?: (tarefa: Tarefa) => void
+  aoAlternarConclusao: (tarefa: Tarefa) => void
+  aoExcluir: (tarefa: Tarefa) => void
 }
 
 export function ListaTarefas({ tarefas, idEmEdicao, emOperacao, aoEditar, aoAlternarConclusao, aoExcluir }: Props) {
@@ -19,7 +19,7 @@ export function ListaTarefas({ tarefas, idEmEdicao, emOperacao, aoEditar, aoAlte
   return (
     <ul className="lista-tarefas">
       {tarefas.map((tarefa) => {
-        const operando = emOperacao?.has(tarefa.id) ?? false
+        const operando = emOperacao.has(tarefa.id)
         const bloqueada = tarefa.id === idEmEdicao || operando
         const concluida = tarefa.status === 'CONCLUIDA'
         return (
@@ -35,14 +35,14 @@ export function ListaTarefas({ tarefas, idEmEdicao, emOperacao, aoEditar, aoAlte
               <time dateTime={tarefa.dataVencimento}>{formatarData(tarefa.dataVencimento)}</time>
             </div>
             <div className="tarefa-acoes">
-              <button type="button" disabled={bloqueada} onClick={() => aoAlternarConclusao?.(tarefa)}>
+              <button type="button" disabled={bloqueada} onClick={() => aoAlternarConclusao(tarefa)}>
                 {concluida ? 'Reabrir' : 'Concluir'}
               </button>
               {/* Editar durante a requisição abriria o formulário com uma versão prestes a mudar. */}
               <button type="button" disabled={operando} onClick={() => aoEditar(tarefa)}>
                 Editar
               </button>
-              <button type="button" disabled={bloqueada} onClick={() => aoExcluir?.(tarefa)}>
+              <button type="button" disabled={bloqueada} onClick={() => aoExcluir(tarefa)}>
                 Excluir
               </button>
             </div>

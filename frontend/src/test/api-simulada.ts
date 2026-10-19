@@ -89,6 +89,13 @@ export function apiEmMemoria(iniciais: Tarefa[], { atraso = 0 } = {}) {
         percentual: concluidas === 0 ? null : 100,
       })
     }),
+    http.post('/api/tarefas', async ({ request }) => {
+      const dados = (await request.json()) as Partial<Tarefa>
+      const criada = umaTarefa({ ...dados, descricao: dados.descricao || null })
+      criada.situacaoPrazo = situacao(criada)
+      tarefas.push(criada)
+      return HttpResponse.json(criada, { status: 201 })
+    }),
     http.get('/api/tarefas/:id', ({ params }) => {
       const tarefa = buscar(params.id)
       return tarefa ? HttpResponse.json(tarefa) : problema(404)

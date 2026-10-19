@@ -122,6 +122,11 @@ public class ManipuladorErros extends ResponseEntityExceptionHandler {
     /** Corrida residual entre a checagem explícita de versão e o commit (D6). */
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ProblemDetail conflitoDeVersao(ObjectOptimisticLockingFailureException excecao) {
+        return problemaDeConflito();
+    }
+
+    /** 409 para a checagem explícita de versão e para a corrida detectada pelo {@code @Version}. */
+    public static ProblemDetail problemaDeConflito() {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
                 "A tarefa foi alterada por outra ação. Recarregue-a e tente novamente.");
         problema.setTitle("Conflito de versão");

@@ -14,7 +14,7 @@ import {
   type Score,
   type Tarefa,
 } from './api'
-import { PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
+import { atendeAoFiltro, PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
 import { FALHA_COMUNICACAO, TAREFA_ALTERADA, TAREFA_REMOVIDA } from './mensagens'
 
 /** Mensagem para o usuário; a chave muda a cada aviso para que leitores de tela o anunciem de novo. */
@@ -40,20 +40,26 @@ export function useTarefas() {
   const avisar = useCallback((texto: string) => setAviso((anterior) => ({ texto, chave: (anterior?.chave ?? 0) + 1 })), [])
   const limparAviso = useCallback(() => setAviso(null), [])
 
+  // Filtro da lista exibida; se a carga de outro filtro falhar, a lista exibida não corresponde a ele.
+  const filtroCarregado = useRef<Filtro | null>(null)
+
   useEffect(() => {
     let ativo = true
     listarTarefas(PARAMETROS_DO_FILTRO[filtro])
       .then((lista) => {
         if (ativo) {
+          filtroCarregado.current = filtro
           setTarefas(lista)
           setFalhaNaCarga(false)
         }
       })
       .catch(() => {
         if (ativo) {
-          // A lista anterior pode ser de outro filtro: some até a carga dar certo.
-          setTarefas(null)
-          setFalhaNaCarga(true)
+          if (filtroCarregado.current !== filtro) {
+            // A lista exibida é de outro filtro: some até a carga dar certo.
+            setTarefas(null)
+            setFalhaNaCarga(true)
+          }
           avisar(FALHA_COMUNICACAO)
         }
       })
@@ -99,13 +105,17 @@ export function useTarefas() {
     [avisar, recarregar],
   )
 
+  /** Se a nova tarefa não atende ao filtro ativo, volta para "Todas" para que ela apareça. */
   const criar = useCallback(
     async (dados: DadosTarefa) => {
-      await criarTarefa(dados)
+      const criada = await criarTarefa(dados)
       limparAviso()
+      if (!atendeAoFiltro(criada, filtro)) {
+        setFiltro('TODAS')
+      }
       recarregar()
     },
-    [limparAviso, recarregar],
+    [filtro, limparAviso, recarregar],
   )
 
   /** Rejeita com ErroNaoEncontrado (depois de remover a tarefa) para que o formulário seja fechado. */

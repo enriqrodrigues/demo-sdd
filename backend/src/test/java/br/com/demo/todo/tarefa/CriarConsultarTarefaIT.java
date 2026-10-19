@@ -95,6 +95,12 @@ class CriarConsultarTarefaIT extends TesteIntegracao {
     }
 
     @Test
+    void tarefaInexistenteNaoEcoaOIdentificadorNaMensagem() throws Exception {
+        mvc.perform(get("/api/tarefas/{id}", "6f1c1a5e-0000-4000-8000-000000000000"))
+                .andExpect(jsonPath("$.detail", not(containsString("6f1c1a5e"))));
+    }
+
+    @Test
     void identificadorMalformado() throws Exception {
         mvc.perform(get("/api/tarefas/abc"))
                 .andExpect(status().isBadRequest())

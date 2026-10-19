@@ -27,7 +27,7 @@ As credenciais nunca ficam no código nem em arquivos versionados.
 | backend           | `DB_USUARIO`       | o mesmo valor de `POSTGRES_USER`             |
 | backend           | `DB_SENHA`         | o mesmo valor de `POSTGRES_PASSWORD`         |
 
-Propriedades opcionais do backend (passadas como argumento, ex.: `--app.fuso-horario=UTC`):
+Propriedades opcionais do backend, passadas pelo plugin do Spring Boot (ex.: `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.arguments=--app.fuso-horario=UTC"`) ou como variáveis de ambiente (`APP_FUSO_HORARIO`, `APP_CORS_ORIGENS_PERMITIDAS`):
 
 | Propriedade                  | Padrão                  | Uso                                              |
 |------------------------------|-------------------------|--------------------------------------------------|
@@ -83,6 +83,19 @@ Push-Location frontend; npm ci; npm test; npm run lint; npm run build; npm audit
 ```
 
 Os testes de integração sobem o próprio PostgreSQL em container; não dependem do banco do `database/` nem das variáveis `DB_*`.
+
+### Verificação manual da interface
+
+Com banco, backend e frontend no ar, em http://localhost:5173:
+
+1. Lista vazia mostra "Nenhuma tarefa por aqui." e o score "Sem tarefas finalizadas esta semana".
+2. Criar tarefas vencidas, vencendo hoje e futuras: cada uma mostra "Atrasada", "Para hoje" ou "No prazo", a prioridade e o vencimento em DD/MM/AAAA.
+3. Salvar com título só de espaços: a mensagem aparece junto ao campo.
+4. Editar o título de uma tarefa.
+5. Filtro "Atrasadas": concluir uma tarefa a tira da lista e o score muda.
+6. Reabrir uma tarefa concluída com vencimento passado: volta a "Atrasada".
+7. Conflito: abrir a edição numa aba, concluir a mesma tarefa em outra aba e salvar na primeira — aparece o aviso, a tarefa aparece concluída e o texto digitado continua no formulário; salvar de novo aplica a edição.
+8. Excluir: cancelar mantém a tarefa; confirmar a remove.
 
 ## Troubleshooting
 

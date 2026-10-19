@@ -10,12 +10,13 @@ import org.springframework.web.ErrorResponseException;
 public class TarefaNaoEncontradaException extends ErrorResponseException {
 
     public TarefaNaoEncontradaException(UUID id) {
-        super(HttpStatus.NOT_FOUND, problema(id), null);
+        super(HttpStatus.NOT_FOUND, problema(), null);
     }
 
-    private static ProblemDetail problema(UUID id) {
+    /** Mensagem fixa: o identificador pedido não é repetido na resposta (design D7). */
+    private static ProblemDetail problema() {
         ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
-                "Tarefa " + id + " não encontrada.");
+                "A tarefa não existe ou foi excluída.");
         problema.setTitle("Tarefa não encontrada");
         return problema;
     }

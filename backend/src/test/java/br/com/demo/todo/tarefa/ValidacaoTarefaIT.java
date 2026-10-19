@@ -1,5 +1,6 @@
 package br.com.demo.todo.tarefa;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
@@ -101,6 +102,14 @@ class ValidacaoTarefaIT extends TesteIntegracao {
         criar(semCampo("dataVencimento"))
                 .andExpect(status().isBadRequest())
                 .andExpect(erroNoCampo("dataVencimento"));
+    }
+
+    @Test
+    void vencimentoVazioEhTratadoComoAusente() throws Exception {
+        criar(com("dataVencimento", ""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros[?(@.campo == 'dataVencimento')].mensagem",
+                        contains("Informe a data de vencimento.")));
     }
 
     @Test
