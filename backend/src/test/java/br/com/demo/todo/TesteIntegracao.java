@@ -1,24 +1,46 @@
 package br.com.demo.todo;
 
+import java.time.Instant;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * Base dos testes de integração: contexto Spring completo contra PostgreSQL 16
- * em container, com a tabela limpa antes de cada teste.
+ * em container, relógio mutável e tabela limpa antes de cada teste.
  */
 @SpringBootTest
-@Import(ContainersConfig.class)
+@Import({ContainersConfig.class, TesteIntegracao.RelogioConfig.class})
 public abstract class TesteIntegracao {
+
+    /** Quarta-feira, 2026-10-21, 09:00 em America/Sao_Paulo. */
+    protected static final Instant INSTANTE_PADRAO = Instant.parse("2026-10-21T12:00:00Z");
 
     @Autowired
     protected JdbcTemplate jdbc;
 
+    @Autowired
+    protected RelogioTeste relogio;
+
     @BeforeEach
-    void limparTabela() {
+    void prepararEstado() {
         jdbc.execute("delete from tarefa");
+        relogio.ajustar(INSTANTE_PADRAO);
+    }
+
+    @TestConfiguration(proxyBeanMethods = false)
+    static class RelogioConfig {
+
+        @Bean
+        @Primary
+        RelogioTeste relogioTeste() {
+            return new RelogioTeste(INSTANTE_PADRAO);
+        }
     }
 }
