@@ -87,6 +87,7 @@ class ScoreSemanalIT extends TesteIntegracao {
     void tarefaReabertaSaiDoScore() throws Exception {
         String id = criar("2026-10-25");
         concluirEm(id, "2026-10-20T15:00:00Z");
+        consultarScore().andExpect(jsonPath("$.concluidas").value(1));
         mvc.perform(post("/api/tarefas/{id}/reabrir", id)).andExpect(status().isOk());
 
         consultarScore()
@@ -98,6 +99,7 @@ class ScoreSemanalIT extends TesteIntegracao {
     void tarefaExcluidaSaiDoScore() throws Exception {
         String id = criar("2026-10-25");
         concluirEm(id, "2026-10-20T15:00:00Z");
+        consultarScore().andExpect(jsonPath("$.concluidas").value(1));
         mvc.perform(delete("/api/tarefas/{id}", id)).andExpect(status().isNoContent());
 
         consultarScore()

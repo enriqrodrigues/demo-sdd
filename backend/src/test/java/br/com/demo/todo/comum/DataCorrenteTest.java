@@ -20,6 +20,12 @@ class DataCorrenteTest {
     private static final LocalDate VENCIMENTO = LocalDate.parse("2026-10-20");
 
     @Test
+    void expoeOFusoUsadoNasConversoes() {
+        assertThat(new DataCorrente(CLOCK, ZoneId.of("America/Sao_Paulo")).fuso())
+                .isEqualTo(ZoneId.of("America/Sao_Paulo"));
+    }
+
+    @Test
     void viradaDeDiaEmUtcAntesDoFusoLocal() {
         DataCorrente dataCorrente = new DataCorrente(CLOCK, ZoneId.of("America/Sao_Paulo"));
 

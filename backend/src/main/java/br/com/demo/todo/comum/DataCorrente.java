@@ -21,4 +21,9 @@ public class DataCorrente {
     public LocalDate hoje() {
         return LocalDate.ofInstant(clock.instant(), fuso);
     }
+
+    /** Fuso configurado, para converter outros instantes em datas locais da mesma forma. */
+    public ZoneId fuso() {
+        return fuso;
+    }
 }

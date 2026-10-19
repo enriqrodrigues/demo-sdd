@@ -17,16 +17,15 @@ public class ServicoProdutividade {
 
     private final TarefaRepository tarefas;
     private final DataCorrente dataCorrente;
-    private final ZoneId fuso;
 
-    public ServicoProdutividade(TarefaRepository tarefas, DataCorrente dataCorrente, ZoneId fuso) {
+    public ServicoProdutividade(TarefaRepository tarefas, DataCorrente dataCorrente) {
         this.tarefas = tarefas;
         this.dataCorrente = dataCorrente;
-        this.fuso = fuso;
     }
 
     @Transactional(readOnly = true)
     public ScoreSemanal semanaCorrente() {
+        ZoneId fuso = dataCorrente.fuso();
         Semana semana = Semana.contendo(dataCorrente.hoje());
         List<Tarefa> concluidas = tarefas.findByStatusAndConcluidaEmGreaterThanEqualAndConcluidaEmLessThan(
                 StatusTarefa.CONCLUIDA, semana.inicioEm(fuso), semana.fimExclusivoEm(fuso));
