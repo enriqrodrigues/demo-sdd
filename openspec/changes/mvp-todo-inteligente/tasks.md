@@ -29,7 +29,7 @@ Convenção: em cada tarefa, o teste indicado em **Verificação** é escrito e 
 
 ## 4. Score de produtividade
 
-- [ ] 4.1 Implementar o cálculo da semana ISO corrente (segunda a domingo) a partir do `Clock` e do fuso. Scenarios: `score-produtividade` › Semana corrente (Consulta numa quarta-feira; Consulta num domingo; Consulta numa segunda-feira). **Verificação:** testes unitários com `Clock.fixed`, um por scenario.
+- [x] 4.1 Implementar o cálculo da semana ISO corrente (segunda a domingo) a partir do `Clock` e do fuso. Scenarios: `score-produtividade` › Semana corrente (Consulta numa quarta-feira; Consulta num domingo; Consulta numa segunda-feira). **Verificação:** testes unitários com `Clock.fixed`, um por scenario.
 - [ ] 4.2 Implementar a função pura de classificação "no prazo" e do percentual (`BigDecimal`, `HALF_UP`, escala 2, `null` para zero concluídas). Scenarios: `score-produtividade` › Conclusão no prazo (Concluída antes do vencimento; Concluída no dia do vencimento; Concluída depois do vencimento); Percentual do score (todos os 4). **Verificação:** testes unitários, um por scenario.
 - [ ] 4.3 Implementar `GET /api/produtividade/semana` consultando as concluídas no intervalo semiaberto `[segunda 00:00, segunda seguinte 00:00)` do fuso. Scenarios: `score-produtividade` › Consulta do score semanal (Estrutura da resposta); Tarefas finalizadas na semana (todos os 6); Conclusão no prazo (Vencimento editado após a conclusão). **Verificação:** testes de integração MockMvc com relógio de teste posicionado em cada instante de conclusão, um por scenario.
 
