@@ -104,7 +104,7 @@ Um único `@RestControllerAdvice` estendendo `ResponseEntityExceptionHandler` pr
 
 ### D10. Frontend
 
-Estado em um hook `useTarefas` (lista, filtro, ids em operação, tarefa em edição) e um cliente HTTP fino em `api.ts` que transforma Problem Details em erros tipados (`ErroValidacao`, `ErroConflito`, `ErroNaoEncontrado`, `ErroComunicacao`). Sem biblioteca de estado ou de dados (React Query, Redux): o volume e o número de telas não justificam. O filtro da UI mapeia para a API: "Pendentes" → `status=PENDENTE`, "Atrasadas" → `situacaoPrazo=ATRASADA`, "Para hoje" → `situacaoPrazo=PARA_HOJE`. A confirmação de exclusão usa um diálogo próprio acessível (não `window.confirm`), facilitando o teste. Formatação de datas e números em `pt-BR` via `Intl`. Em desenvolvimento o Vite faz proxy de `/api` para o backend.
+Estado em um hook `useTarefas` (lista, filtro, ids em operação, tarefa em edição) e um cliente HTTP fino em `api.ts` que transforma Problem Details em erros tipados (`ErroValidacao`, `ErroConflito`, `ErroNaoEncontrado`, `ErroComunicacao`). Sem biblioteca de estado ou de dados (React Query, Redux): o volume e o número de telas não justificam. O filtro da UI mapeia para a API: "Pendentes" → `status=PENDENTE`, "Atrasadas" → `situacaoPrazo=ATRASADA`, "Para hoje" → `situacaoPrazo=PARA_HOJE`. A confirmação de exclusão usa um diálogo próprio acessível (não `window.confirm`), facilitando o teste. Datas são formatadas a partir do texto ISO (sem `Date`, que aplicaria o fuso do navegador) e números em `pt-BR` via `Intl`. Em desenvolvimento o Vite faz proxy de `/api` para o backend.
 
 ## Risks / Trade-offs
 

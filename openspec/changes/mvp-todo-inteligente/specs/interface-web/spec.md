@@ -43,6 +43,10 @@ A interface SHALL permitir criar uma tarefa por um formulário com título, desc
 - **WHEN** o usuário clica duas vezes rapidamente em salvar uma nova tarefa
 - **THEN** apenas uma tarefa é criada, pois o botão fica desabilitado enquanto a requisição está em andamento
 
+#### Scenario: Criação com filtro ativo
+- **WHEN** o filtro "Atrasadas" está ativo e o usuário cria uma tarefa que vence no futuro
+- **THEN** o filtro passa a "Todas" e a nova tarefa aparece na lista
+
 ### Requirement: Editar tarefa pela interface
 A interface SHALL permitir editar uma tarefa existente no mesmo formulário, preenchido com os valores atuais, enviando a `version` da tarefa carregada. Enquanto o formulário de uma tarefa estiver aberto, as ações de concluir/reabrir e excluir dessa mesma tarefa SHALL ficar desabilitadas na lista.
 

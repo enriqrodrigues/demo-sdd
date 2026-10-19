@@ -161,7 +161,7 @@ A listagem SHALL aceitar os parâmetros opcionais `status` e `situacaoPrazo`, co
 A API SHALL atualizar `titulo`, `descricao`, `dataVencimento` e `prioridade` via `PUT /api/tarefas/{id}`, substituindo todos os campos editáveis com as mesmas validações da criação. A edição SHALL NOT alterar `status` nem `concluidaEm`; esses campos, se enviados, são ignorados. Tarefas concluídas também podem ser editadas.
 
 #### Scenario: Edição válida
-- **WHEN** o cliente envia um `PUT` válido com a `version` atual da tarefa
+- **WHEN** o cliente envia um `PUT` válido, que altera algum campo, com a `version` atual da tarefa
 - **THEN** a API responde 200 com a tarefa atualizada e `version` incrementada
 
 #### Scenario: Status enviado na edição é ignorado
