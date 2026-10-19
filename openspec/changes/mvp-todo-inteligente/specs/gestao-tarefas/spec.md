@@ -61,7 +61,7 @@ O campo `titulo` SHALL ser obrigatório e, após remoção de espaços nas extre
 - **THEN** a tarefa é criada com `titulo` `"Revisar PR"`
 
 ### Requirement: Validação da descrição
-O campo `descricao` SHALL ser opcional e ter no máximo 2000 caracteres. Descrição ausente, `null` ou vazia SHALL ser armazenada como `null`.
+O campo `descricao` SHALL ser opcional e ter no máximo 2000 caracteres. Descrição ausente, `null`, vazia ou só com espaços SHALL ser armazenada como `null`.
 
 #### Scenario: Descrição com 2000 caracteres
 - **WHEN** o cliente cria uma tarefa com `descricao` de exatamente 2000 caracteres
@@ -73,6 +73,10 @@ O campo `descricao` SHALL ser opcional e ter no máximo 2000 caracteres. Descri�
 
 #### Scenario: Descrição vazia vira nula
 - **WHEN** o cliente cria uma tarefa com `descricao` `""`
+- **THEN** a tarefa é criada com `descricao` `null`
+
+#### Scenario: Descrição só com espaços vira nula
+- **WHEN** o cliente cria uma tarefa com `descricao` `"   "`
 - **THEN** a tarefa é criada com `descricao` `null`
 
 ### Requirement: Validação da data de vencimento

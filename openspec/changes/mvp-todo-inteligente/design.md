@@ -31,7 +31,7 @@ frontend/   React 18 + TypeScript, Vite, Vitest + Testing Library
 database/   docker-compose.yml (PostgreSQL 16), .env.example
 ```
 
-O backend é organizado por módulo de domínio (`tarefa`, `prazo`, `produtividade`) mais um pacote `comum` com o tratamento de erros e o relógio. `prazo` e `produtividade` dependem de `tarefa` apenas por leitura; nada depende deles.
+O backend é organizado por módulo de domínio (`tarefa`, `prazo`, `produtividade`) mais um pacote `comum` com o tratamento de erros e o relógio. `prazo` contém apenas regras puras e não depende de outros módulos de domínio; `tarefa` o usa no mapeamento para DTO e no filtro por situação (D3); `produtividade` depende de `tarefa` (apenas leitura) e de `prazo`; nada depende de `produtividade`.
 
 *Alternativa:* Maven multi-módulo com o frontend embutido via plugin — descartada por acoplar o build do React ao Maven sem ganho para a demo.
 
@@ -47,7 +47,7 @@ Testes unitários usam `Clock.fixed(...)`; testes de integração substituem o b
 
 ### D3. Situação de prazo calculada no mapeamento para DTO
 
-`CalculadoraPrazo` é uma função pura `(status, dataVencimento, hoje) → SituacaoPrazo`. O mapeador entidade → DTO a invoca com `hoje` obtido de `DataCorrente` (D2). A entidade não tem campo de situação, e nada a persiste.
+`CalculadoraPrazo` é uma função pura `(concluida, dataVencimento, hoje) → SituacaoPrazo`, que não conhece a entidade nem o enum de status de `tarefa`. O mapeador entidade → DTO a invoca com `hoje` obtido de `DataCorrente` (D2). A entidade não tem campo de situação, e nada a persiste.
 
 O filtro `?situacaoPrazo=` é traduzido para predicados de consulta sobre `status` e `dataVencimento` relativos a `hoje` (ex.: `ATRASADA` ⇒ `status = PENDENTE AND dataVencimento < hoje`), reutilizando a mesma definição em um único lugar para não divergir da calculadora — um teste confronta os dois caminhos.
 
@@ -88,9 +88,9 @@ A entidade usa `@Version`. No `PUT`, o serviço compara a `version` recebida com
 
 ### D7. Desserialização estrita e erros em Problem Details
 
-Jackson configurado com `FAIL_ON_UNKNOWN_PROPERTIES=true`, `FAIL_ON_NUMBERS_FOR_ENUMS=true` e `ACCEPT_CASE_INSENSITIVE_ENUMS=false`. `dataVencimento`, assim como `prioridade`, chega como texto no DTO de entrada e é validada por um validador de bean: apenas `YYYY-MM-DD` estrito e data real (`ResolverStyle.STRICT`, rejeitando `2026-02-30`). Os campos somente leitura (`id`, `status`, `concluidaEm`, `situacaoPrazo`) são declarados no DTO de entrada e marcados como ignorados, para que sejam aceitos e descartados — e não rejeitados como desconhecidos. `version` existe apenas no DTO de edição.
+Jackson configurado com `FAIL_ON_UNKNOWN_PROPERTIES=true`, `FAIL_ON_NUMBERS_FOR_ENUMS=true` e `ACCEPT_CASE_INSENSITIVE_ENUMS=false`. `dataVencimento`, assim como `prioridade`, chega como texto no DTO de entrada e é validada por um validador de bean: apenas `YYYY-MM-DD` estrito e data real (`ResolverStyle.STRICT`, rejeitando `2026-02-30`). Os campos somente leitura (`id`, `status`, `concluidaEm`, `situacaoPrazo`) são declarados no DTO de entrada e marcados como ignorados, para que sejam aceitos e descartados — e não rejeitados como desconhecidos. Criação e edição usam o mesmo DTO de entrada; `version` é obrigatória só na edição (grupo de validação) e, na criação, é descartada como os demais campos do servidor.
 
-Um único `@RestControllerAdvice` estendendo `ResponseEntityExceptionHandler` produz `ProblemDetail` (`spring.mvc.problemdetails.enabled=true`) para: validação de bean (agrega todos os campos em `erros[{campo, mensagem}]`), JSON malformado e erros de tipo/enum/data do Jackson (mapeados para o campo de origem quando identificável), parâmetro de filtro ou UUID inválido (400), tarefa inexistente (404), conflito (409) e qualquer outra exceção (500 com `detail` genérico, sem stack trace; o detalhe vai só para o log). Para que todos os campos inválidos sejam reportados juntos, o DTO recebe `prioridade` e `dataVencimento` como texto e a validação de domínio é feita por validadores de bean, em vez de o Jackson abortar no primeiro valor inválido.
+Um único `@RestControllerAdvice` estendendo `ResponseEntityExceptionHandler` produz `ProblemDetail` para: validação de bean (agrega todos os campos em `erros[{campo, mensagem}]`), JSON malformado e erros de tipo/enum/data do Jackson (mapeados para o campo de origem quando identificável), parâmetro de filtro ou UUID inválido (400), tarefa inexistente (404), conflito (409), erros do próprio framework (rota inexistente, método ou tipo de conteúdo não suportado), com textos em português, e qualquer outra exceção (500 com `detail` genérico, sem stack trace; o detalhe vai só para o log). As mensagens de erro são fixas e não ecoam o valor recebido. Para que todos os campos inválidos sejam reportados juntos, o DTO recebe `prioridade` e `dataVencimento` como texto e a validação de domínio é feita por validadores de bean, em vez de o Jackson abortar no primeiro valor inválido.
 
 ### D8. Configuração e segurança local
 
