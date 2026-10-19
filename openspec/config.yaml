@@ -30,3 +30,22 @@ schema: spec-driven
 #     archive:
 #       guidance:
 #         - Summarize the archive outcome before finishing
+
+context: |
+  Escreva todos os artefatos em português.
+  Credenciais por variável de ambiente; campos de texto com limite de tamanho;
+  enums não aceitam valores numéricos; Postgres publicado só em 127.0.0.1.
+
+rules:
+  tasks:
+    - Cada tarefa cita os scenarios que cobre e cabe em um commit
+    - A verificação de cada tarefa é um teste escrito antes do código
+  specs:
+    - Na UI, inclua scenarios de interação entre ações sobre a mesma entidade
+      (ex.: editar enquanto conclui)
+
+operations:
+  apply:
+    guidance:
+      - Use TDD por tarefa e faça um commit por tarefa
+      - Ao fechar uma seção do tasks.md, peça revisão de código antes de seguir
