@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   consultarScore,
+  consultarTarefa,
   criarTarefa,
   editarTarefa,
   listarTarefas,
@@ -60,5 +61,15 @@ export function useTarefas() {
     [recarregar],
   )
 
-  return { tarefas, filtro, setFiltro, score, criar, editar }
+  /** Busca a versão atual de uma tarefa e atualiza lista e score. */
+  const recarregarTarefa = useCallback(
+    async (id: string) => {
+      const atual = await consultarTarefa(id)
+      recarregar()
+      return atual
+    },
+    [recarregar],
+  )
+
+  return { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa }
 }

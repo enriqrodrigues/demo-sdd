@@ -8,9 +8,11 @@ interface Props {
   /** Rejeita com {@link ErroValidacao} para exibir erros por campo; outros erros ficam com quem chama. */
   aoSalvar: (dados: DadosTarefa) => Promise<void>
   aoCancelar: () => void
+  /** Aviso vindo de fora, como o de conflito de edição. */
+  aviso?: string
 }
 
-export function FormularioTarefa({ titulo, valoresIniciais, aoSalvar, aoCancelar }: Props) {
+export function FormularioTarefa({ titulo, valoresIniciais, aoSalvar, aoCancelar, aviso }: Props) {
   const [valores, setValores] = useState<DadosTarefa>(valoresIniciais)
   const [erros, setErros] = useState<Record<string, string>>({})
   const [erroGeral, setErroGeral] = useState<string | null>(null)
@@ -62,6 +64,11 @@ export function FormularioTarefa({ titulo, valoresIniciais, aoSalvar, aoCancelar
   return (
     <form className="formulario" aria-label={titulo} onSubmit={enviar} noValidate>
       <h2>{titulo}</h2>
+      {aviso && !erroGeral && (
+        <p className="aviso" role="alert">
+          {aviso}
+        </p>
+      )}
       {erroGeral && (
         <p className="erro-geral" role="alert">
           {erroGeral}

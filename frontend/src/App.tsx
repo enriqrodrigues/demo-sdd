@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { DadosTarefa, Tarefa } from './api'
+import { ErroConflito, type DadosTarefa, type Tarefa } from './api'
 import { CabecalhoScore } from './componentes/CabecalhoScore'
 import { Filtros } from './componentes/Filtros'
 import { FormularioTarefa } from './componentes/FormularioTarefa'
@@ -8,7 +8,13 @@ import { useTarefas } from './useTarefas'
 
 const TAREFA_EM_BRANCO: DadosTarefa = { titulo: '', descricao: '', dataVencimento: '', prioridade: 'MEDIA' }
 
-type EstadoFormulario = { modo: 'fechado' } | { modo: 'criar' } | { modo: 'editar'; tarefa: Tarefa }
+type EstadoFormulario =
+  | { modo: 'fechado' }
+  | { modo: 'criar' }
+  | { modo: 'editar'; tarefa: Tarefa; aviso?: string }
+
+const AVISO_CONFLITO =
+  'Esta tarefa foi alterada em outro lugar. Ela foi recarregada; revise os dados e salve de novo.'
 
 function dadosDa(tarefa: Tarefa): DadosTarefa {
   return {
@@ -20,7 +26,7 @@ function dadosDa(tarefa: Tarefa): DadosTarefa {
 }
 
 export default function App() {
-  const { tarefas, filtro, setFiltro, score, criar, editar } = useTarefas()
+  const { tarefas, filtro, setFiltro, score, criar, editar, recarregarTarefa } = useTarefas()
   const [formulario, setFormulario] = useState<EstadoFormulario>({ modo: 'fechado' })
   const fechar = () => setFormulario({ modo: 'fechado' })
 
@@ -30,8 +36,17 @@ export default function App() {
   }
 
   async function salvarEdicao(tarefa: Tarefa, dados: DadosTarefa) {
-    await editar(tarefa, dados)
-    fechar()
+    try {
+      await editar(tarefa, dados)
+      fechar()
+    } catch (erro) {
+      if (!(erro instanceof ErroConflito)) {
+        throw erro
+      }
+      // O formulário continua aberto com o que foi digitado; o próximo salvar usa a versão recarregada.
+      const atual = await recarregarTarefa(tarefa.id)
+      setFormulario({ modo: 'editar', tarefa: atual, aviso: AVISO_CONFLITO })
+    }
   }
 
   return (
@@ -56,6 +71,7 @@ export default function App() {
             valoresIniciais={dadosDa(formulario.tarefa)}
             aoSalvar={(dados) => salvarEdicao(formulario.tarefa, dados)}
             aoCancelar={fechar}
+            aviso={formulario.aviso}
           />
         )}
         {formulario.modo === 'fechado' && (
