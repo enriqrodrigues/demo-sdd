@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,7 +37,7 @@ public class TarefaController {
     }
 
     @PostMapping
-    public ResponseEntity<TarefaResposta> criar(@Valid @RequestBody NovaTarefaRequisicao requisicao) {
+    public ResponseEntity<TarefaResposta> criar(@Valid @RequestBody TarefaRequisicao requisicao) {
         Tarefa tarefa = servico.criar(requisicao);
         return ResponseEntity.created(URI.create("/api/tarefas/" + tarefa.getId()))
                 .body(mapeador.paraResposta(tarefa));
@@ -53,5 +56,11 @@ public class TarefaController {
     @GetMapping("/{id}")
     public TarefaResposta consultar(@PathVariable UUID id) {
         return mapeador.paraResposta(servico.consultar(id));
+    }
+
+    @PutMapping("/{id}")
+    public TarefaResposta editar(@PathVariable UUID id,
+            @Validated({Default.class, TarefaRequisicao.Edicao.class}) @RequestBody TarefaRequisicao requisicao) {
+        return mapeador.paraResposta(servico.editar(id, requisicao));
     }
 }

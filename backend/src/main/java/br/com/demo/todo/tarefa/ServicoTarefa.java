@@ -19,7 +19,7 @@ public class ServicoTarefa {
     }
 
     @Transactional
-    public Tarefa criar(NovaTarefaRequisicao requisicao) {
+    public Tarefa criar(TarefaRequisicao requisicao) {
         Tarefa tarefa = Tarefa.nova(
                 requisicao.titulo(),
                 requisicao.descricao(),
@@ -37,6 +37,28 @@ public class ServicoTarefa {
 
     @Transactional(readOnly = true)
     public Tarefa consultar(UUID id) {
+        return buscar(id);
+    }
+
+    /**
+     * Edita só se o cliente conhece a versão atual; a corrida entre esta checagem e o commit é
+     * coberta pelo {@code @Version} da entidade.
+     */
+    @Transactional
+    public Tarefa editar(UUID id, TarefaRequisicao requisicao) {
+        Tarefa tarefa = buscar(id);
+        if (!tarefa.getVersion().equals(requisicao.version())) {
+            throw new ConflitoVersaoException();
+        }
+        tarefa.editar(
+                requisicao.titulo(),
+                requisicao.descricao(),
+                requisicao.dataVencimentoConvertida(),
+                requisicao.prioridadeConvertida());
+        return repositorio.saveAndFlush(tarefa);
+    }
+
+    private Tarefa buscar(UUID id) {
         return repositorio.findById(id).orElseThrow(() -> new TarefaNaoEncontradaException(id));
     }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -77,6 +78,15 @@ public class ManipuladorErros extends ResponseEntityExceptionHandler {
                 "O corpo da requisição não é um JSON válido.");
         problema.setTitle("Requisição malformada");
         return ResponseEntity.badRequest().body(problema);
+    }
+
+    /** Corrida residual entre a checagem explícita de versão e o commit (D6). */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ProblemDetail conflitoDeVersao(ObjectOptimisticLockingFailureException excecao) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "A tarefa foi alterada por outra ação. Recarregue-a e tente novamente.");
+        problema.setTitle("Conflito de versão");
+        return problema;
     }
 
     @ExceptionHandler(Exception.class)

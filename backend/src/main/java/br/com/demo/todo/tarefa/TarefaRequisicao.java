@@ -13,13 +13,14 @@ import br.com.demo.todo.comum.DataIsoValidator;
 import br.com.demo.todo.comum.ValorEnum;
 
 /**
- * Corpo de criação de tarefa. O título chega sem os espaços das extremidades e a descrição
- * vazia vira {@code null}. Data e prioridade chegam como texto para que seus erros sejam
- * agregados aos demais. Campos calculados pelo servidor são aceitos e descartados; qualquer
- * outra propriedade desconhecida é rejeitada.
+ * Corpo de criação e de edição de tarefa. O título chega sem os espaços das extremidades e a
+ * descrição vazia vira {@code null}. Data e prioridade chegam como texto para que seus erros
+ * sejam agregados aos demais. Campos calculados pelo servidor são aceitos e descartados; qualquer
+ * outra propriedade desconhecida é rejeitada. {@code version} é obrigatória só na edição e
+ * ignorada na criação.
  */
-@JsonIgnoreProperties({"id", "status", "concluidaEm", "situacaoPrazo", "version"})
-public record NovaTarefaRequisicao(
+@JsonIgnoreProperties({"id", "status", "concluidaEm", "situacaoPrazo"})
+public record TarefaRequisicao(
         @NotBlank(message = "Informe o título.")
         @Size(max = 100, message = "O título deve ter no máximo 100 caracteres.")
         String titulo,
@@ -33,9 +34,16 @@ public record NovaTarefaRequisicao(
 
         @NotNull(message = "Informe a prioridade.")
         @ValorEnum(value = Prioridade.class, message = "A prioridade deve ser BAIXA, MEDIA ou ALTA.")
-        String prioridade) {
+        String prioridade,
 
-    public NovaTarefaRequisicao {
+        @NotNull(groups = Edicao.class, message = "Informe a versão da tarefa que está sendo editada.")
+        Long version) {
+
+    /** Grupo de validação aplicado apenas na edição. */
+    public interface Edicao {
+    }
+
+    public TarefaRequisicao {
         titulo = titulo == null ? null : titulo.strip();
         descricao = descricao == null || descricao.isEmpty() ? null : descricao;
     }

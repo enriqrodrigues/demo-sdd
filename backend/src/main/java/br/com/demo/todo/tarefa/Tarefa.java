@@ -50,6 +50,14 @@ public class Tarefa {
         return tarefa;
     }
 
+    /** Substitui os campos editáveis; status e instante de conclusão não mudam. */
+    public void editar(String titulo, String descricao, LocalDate dataVencimento, Prioridade prioridade) {
+        this.titulo = titulo;
+        this.descricao = descricao;
+        this.dataVencimento = dataVencimento;
+        this.prioridade = prioridade;
+    }
+
     public UUID getId() {
         return id;
     }
