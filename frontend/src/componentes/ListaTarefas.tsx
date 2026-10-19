@@ -19,7 +19,8 @@ export function ListaTarefas({ tarefas, idEmEdicao, emOperacao, aoEditar, aoAlte
   return (
     <ul className="lista-tarefas">
       {tarefas.map((tarefa) => {
-        const bloqueada = tarefa.id === idEmEdicao || (emOperacao?.has(tarefa.id) ?? false)
+        const operando = emOperacao?.has(tarefa.id) ?? false
+        const bloqueada = tarefa.id === idEmEdicao || operando
         const concluida = tarefa.status === 'CONCLUIDA'
         return (
           <li key={tarefa.id} className={`tarefa situacao-${tarefa.situacaoPrazo.toLowerCase()}`}>
@@ -37,7 +38,8 @@ export function ListaTarefas({ tarefas, idEmEdicao, emOperacao, aoEditar, aoAlte
               <button type="button" disabled={bloqueada} onClick={() => aoAlternarConclusao?.(tarefa)}>
                 {concluida ? 'Reabrir' : 'Concluir'}
               </button>
-              <button type="button" onClick={() => aoEditar(tarefa)}>
+              {/* Editar durante a requisição abriria o formulário com uma versão prestes a mudar. */}
+              <button type="button" disabled={operando} onClick={() => aoEditar(tarefa)}>
                 Editar
               </button>
               <button type="button" disabled={bloqueada} onClick={() => aoExcluir?.(tarefa)}>

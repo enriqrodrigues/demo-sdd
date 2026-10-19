@@ -17,6 +17,12 @@ import {
 import { PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
 import { FALHA_COMUNICACAO, TAREFA_ALTERADA, TAREFA_REMOVIDA } from './mensagens'
 
+/** Mensagem para o usuário; a chave muda a cada aviso para que leitores de tela o anunciem de novo. */
+export interface Aviso {
+  texto: string
+  chave: number
+}
+
 /**
  * Estado da tela: filtro ativo, lista de tarefas, score da semana, tarefas com requisição em
  * andamento e o aviso exibido ao usuário.
@@ -26,9 +32,13 @@ export function useTarefas() {
   const [tarefas, setTarefas] = useState<Tarefa[] | null>(null)
   const [score, setScore] = useState<Score | null>(null)
   const [falhaNaCarga, setFalhaNaCarga] = useState(false)
-  const [aviso, setAviso] = useState<string | null>(null)
+  const [falhaNoScore, setFalhaNoScore] = useState(false)
+  const [aviso, setAviso] = useState<Aviso | null>(null)
   // Incrementar a geração faz lista e score serem consultados de novo.
   const [geracao, setGeracao] = useState(0)
+
+  const avisar = useCallback((texto: string) => setAviso((anterior) => ({ texto, chave: (anterior?.chave ?? 0) + 1 })), [])
+  const limparAviso = useCallback(() => setAviso(null), [])
 
   useEffect(() => {
     let ativo = true
@@ -41,14 +51,16 @@ export function useTarefas() {
       })
       .catch(() => {
         if (ativo) {
+          // A lista anterior pode ser de outro filtro: some até a carga dar certo.
+          setTarefas(null)
           setFalhaNaCarga(true)
-          setAviso(FALHA_COMUNICACAO)
+          avisar(FALHA_COMUNICACAO)
         }
       })
     return () => {
       ativo = false
     }
-  }, [filtro, geracao])
+  }, [filtro, geracao, avisar])
 
   useEffect(() => {
     let ativo = true
@@ -56,36 +68,44 @@ export function useTarefas() {
       .then((atual) => {
         if (ativo) {
           setScore(atual)
+          setFalhaNoScore(false)
         }
       })
       .catch(() => {
         if (ativo) {
-          setAviso(FALHA_COMUNICACAO)
+          setFalhaNoScore(true)
+          avisar(FALHA_COMUNICACAO)
         }
       })
     return () => {
       ativo = false
     }
-  }, [geracao])
+  }, [geracao, avisar])
 
   const recarregar = useCallback(() => setGeracao((g) => g + 1), [])
+
+  const tentarDeNovo = useCallback(() => {
+    limparAviso()
+    recarregar()
+  }, [limparAviso, recarregar])
 
   /** A API respondeu 404: a tarefa foi excluída em outro lugar e sai da lista. */
   const removerInexistente = useCallback(
     (id: string) => {
       setTarefas((lista) => lista?.filter((t) => t.id !== id) ?? null)
-      setAviso(TAREFA_REMOVIDA)
+      avisar(TAREFA_REMOVIDA)
       recarregar()
     },
-    [recarregar],
+    [avisar, recarregar],
   )
 
   const criar = useCallback(
     async (dados: DadosTarefa) => {
       await criarTarefa(dados)
+      limparAviso()
       recarregar()
     },
-    [recarregar],
+    [limparAviso, recarregar],
   )
 
   /** Rejeita com ErroNaoEncontrado (depois de remover a tarefa) para que o formulário seja fechado. */
@@ -99,9 +119,10 @@ export function useTarefas() {
         }
         throw erro
       }
+      limparAviso()
       recarregar()
     },
-    [recarregar, removerInexistente],
+    [limparAviso, recarregar, removerInexistente],
   )
 
   /** Busca a versão atual de uma tarefa e atualiza lista e score. */
@@ -131,21 +152,22 @@ export function useTarefas() {
       setEmOperacao(new Set(operacoesAtivas.current))
       try {
         await acao()
+        limparAviso()
       } catch (erro) {
         if (erro instanceof ErroNaoEncontrado) {
           removerInexistente(id)
         } else if (erro instanceof ErroConflito) {
-          setAviso(TAREFA_ALTERADA)
+          avisar(TAREFA_ALTERADA)
           recarregar()
         } else {
-          setAviso(FALHA_COMUNICACAO)
+          avisar(FALHA_COMUNICACAO)
         }
       } finally {
         operacoesAtivas.current.delete(id)
         setEmOperacao(new Set(operacoesAtivas.current))
       }
     },
-    [recarregar, removerInexistente],
+    [avisar, limparAviso, recarregar, removerInexistente],
   )
 
   const alternarConclusao = useCallback(
@@ -170,17 +192,18 @@ export function useTarefas() {
     [operar, recarregar],
   )
 
-  const limparAviso = useCallback(() => setAviso(null), [])
-
   return {
     tarefas,
     falhaNaCarga,
+    falhaNoScore,
+    tentarDeNovo,
     filtro,
     setFiltro,
     score,
     criar,
     editar,
     recarregarTarefa,
+    removerInexistente,
     emOperacao,
     alternarConclusao,
     excluir,

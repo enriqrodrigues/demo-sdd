@@ -2,6 +2,8 @@ import { useRef, useState, type FormEvent } from 'react'
 import { ErroValidacao, type DadosTarefa, type Prioridade } from '../api'
 import { FALHA_COMUNICACAO } from '../mensagens'
 
+const CAMPOS: (keyof DadosTarefa)[] = ['titulo', 'descricao', 'dataVencimento', 'prioridade']
+
 interface Props {
   /** Título do formulário, também usado como seu nome acessível. */
   titulo: string
@@ -45,7 +47,8 @@ export function FormularioTarefa({ titulo, valoresIniciais, aoSalvar, aoCancelar
         return
       }
       setErros(erro.erros)
-      if (Object.keys(erro.erros).length === 0) {
+      // Sem erro em nenhum campo exibido (corpo ilegível, ou erro em version, por exemplo).
+      if (!CAMPOS.some((campo) => erro.erros[campo])) {
         setErroGeral('Não foi possível salvar: verifique os dados informados.')
       }
     } finally {

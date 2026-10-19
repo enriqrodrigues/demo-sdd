@@ -3,13 +3,15 @@ import { formatarDiaMes, formatarPercentual } from '../formatacao'
 
 interface Props {
   score: Score | null
+  /** A consulta do score falhou e não há valor anterior para mostrar. */
+  indisponivel?: boolean
 }
 
-export function CabecalhoScore({ score }: Props) {
+export function CabecalhoScore({ score, indisponivel = false }: Props) {
   return (
     <section className="score" aria-label="Score da semana">
       {score === null ? (
-        <span className="score-carregando">Carregando score…</span>
+        <span className="score-carregando">{indisponivel ? 'Score indisponível' : 'Carregando score…'}</span>
       ) : (
         <>
           {score.percentual === null ? (
