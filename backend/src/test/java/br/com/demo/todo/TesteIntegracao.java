@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import({ContainersConfig.class, TesteIntegracao.RelogioConfig.class})
+@Import({ContainersConfig.class, TesteIntegracao.RelogioConfig.class, ControladorFalhaTeste.class})
 public abstract class TesteIntegracao {
 
     /** Quarta-feira, 2026-10-21, 09:00 em America/Sao_Paulo. */
