@@ -146,3 +146,57 @@ body {
   color: var(--cinza);
   font-size: 0.85rem;
 }
+
+.botao-principal {
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.formulario {
+  display: grid;
+  gap: 6px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 8%);
+}
+
+.formulario h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.formulario input,
+.formulario textarea,
+.formulario select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #cbd2d9;
+  border-radius: 4px;
+}
+
+.formulario [aria-invalid='true'] {
+  border-color: var(--vermelho);
+}
+
+.erro-campo,
+.erro-geral {
+  color: var(--vermelho);
+  font-size: 0.85rem;
+}
+
+.formulario-acoes {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
