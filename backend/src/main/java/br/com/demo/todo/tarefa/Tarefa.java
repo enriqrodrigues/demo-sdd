@@ -58,6 +58,21 @@ public class Tarefa {
         this.prioridade = prioridade;
     }
 
+    /** Idempotente: uma tarefa já concluída mantém o instante da primeira conclusão. */
+    public void concluir(Instant agora) {
+        if (status == StatusTarefa.CONCLUIDA) {
+            return;
+        }
+        status = StatusTarefa.CONCLUIDA;
+        concluidaEm = agora;
+    }
+
+    /** Idempotente: reabrir uma tarefa pendente não a altera. */
+    public void reabrir() {
+        status = StatusTarefa.PENDENTE;
+        concluidaEm = null;
+    }
+
     public UUID getId() {
         return id;
     }

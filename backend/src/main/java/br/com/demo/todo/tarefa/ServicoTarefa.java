@@ -1,6 +1,8 @@
 package br.com.demo.todo.tarefa;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,9 +15,11 @@ import br.com.demo.todo.prazo.SituacaoPrazo;
 public class ServicoTarefa {
 
     private final TarefaRepository repositorio;
+    private final Clock clock;
 
-    public ServicoTarefa(TarefaRepository repositorio) {
+    public ServicoTarefa(TarefaRepository repositorio, Clock clock) {
         this.repositorio = repositorio;
+        this.clock = clock;
     }
 
     @Transactional
@@ -55,6 +59,21 @@ public class ServicoTarefa {
                 requisicao.descricao(),
                 requisicao.dataVencimentoConvertida(),
                 requisicao.prioridadeConvertida());
+        return repositorio.saveAndFlush(tarefa);
+    }
+
+    /** O instante vem do Clock, na precisão de microssegundos do {@code timestamptz}. */
+    @Transactional
+    public Tarefa concluir(UUID id) {
+        Tarefa tarefa = buscar(id);
+        tarefa.concluir(clock.instant().truncatedTo(ChronoUnit.MICROS));
+        return repositorio.saveAndFlush(tarefa);
+    }
+
+    @Transactional
+    public Tarefa reabrir(UUID id) {
+        Tarefa tarefa = buscar(id);
+        tarefa.reabrir();
         return repositorio.saveAndFlush(tarefa);
     }
 

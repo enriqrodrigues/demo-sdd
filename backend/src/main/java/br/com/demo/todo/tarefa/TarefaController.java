@@ -58,6 +58,16 @@ public class TarefaController {
         return mapeador.paraResposta(servico.consultar(id));
     }
 
+    @PostMapping("/{id}/concluir")
+    public TarefaResposta concluir(@PathVariable UUID id) {
+        return mapeador.paraResposta(servico.concluir(id));
+    }
+
+    @PostMapping("/{id}/reabrir")
+    public TarefaResposta reabrir(@PathVariable UUID id) {
+        return mapeador.paraResposta(servico.reabrir(id));
+    }
+
     @PutMapping("/{id}")
     public TarefaResposta editar(@PathVariable UUID id,
             @Validated({Default.class, TarefaRequisicao.Edicao.class}) @RequestBody TarefaRequisicao requisicao) {
