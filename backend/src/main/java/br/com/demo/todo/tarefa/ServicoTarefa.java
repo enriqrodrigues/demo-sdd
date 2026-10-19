@@ -77,6 +77,11 @@ public class ServicoTarefa {
         return repositorio.saveAndFlush(tarefa);
     }
 
+    @Transactional
+    public void excluir(UUID id) {
+        repositorio.delete(buscar(id));
+    }
+
     private Tarefa buscar(UUID id) {
         return repositorio.findById(id).orElseThrow(() -> new TarefaNaoEncontradaException(id));
     }
