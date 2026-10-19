@@ -1,5 +1,6 @@
 package br.com.demo.todo.tarefa;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,11 @@ public class ServicoTarefa {
                 requisicao.dataVencimentoConvertida(),
                 requisicao.prioridadeConvertida());
         return repositorio.saveAndFlush(tarefa);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Tarefa> listar() {
+        return repositorio.findAll(ConsultasTarefa.ordenadaParaListagem());
     }
 
     @Transactional(readOnly = true)
