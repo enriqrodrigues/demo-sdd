@@ -35,7 +35,7 @@ Convenção: em cada tarefa, o teste indicado em **Verificação** é escrito e 
 
 ## 5. Interface web
 
-- [ ] 5.1 Implementar `api.ts` com chamadas a todos os endpoints e a conversão de Problem Details em `ErroValidacao`, `ErroConflito`, `ErroNaoEncontrado` e `ErroComunicacao` (rede e 5xx). Scenarios: base de `interface-web` › Conflito de edição, Tarefa removida durante uma ação e Falha de comunicação. **Verificação:** testes Vitest com MSW, um por tipo de erro e um por endpoint feliz.
+- [x] 5.1 Implementar `api.ts` com chamadas a todos os endpoints e a conversão de Problem Details em `ErroValidacao`, `ErroConflito`, `ErroNaoEncontrado` e `ErroComunicacao` (rede e 5xx). Scenarios: base de `interface-web` › Conflito de edição, Tarefa removida durante uma ação e Falha de comunicação. **Verificação:** testes Vitest com MSW, um por tipo de erro e um por endpoint feliz.
 - [ ] 5.2 Implementar a lista de tarefas com rótulos de situação, prioridade e vencimento em `DD/MM/AAAA`, e o estado vazio. Scenarios: `interface-web` › Lista de tarefas (Exibição das tarefas; Lista vazia). **Verificação:** testes de componente com MSW, um por scenario.
 - [ ] 5.3 Implementar os filtros "Todas", "Pendentes", "Atrasadas" e "Para hoje" mapeados para os parâmetros da API. Scenarios: `interface-web` › Filtros da lista (Filtrar atrasadas). **Verificação:** teste de componente que confere os parâmetros enviados ao MSW e as tarefas exibidas.
 - [ ] 5.4 Implementar o score no cabeçalho com formatação `pt-BR`. Scenarios: `interface-web` › Score no cabeçalho (Score com dados; Score sem dados). **Verificação:** testes de componente com MSW, um por scenario.
