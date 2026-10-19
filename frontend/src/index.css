@@ -200,3 +200,17 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.tarefa-acoes {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tarefa-acoes button {
+  border: 1px solid #cbd2d9;
+  background: #fff;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+}

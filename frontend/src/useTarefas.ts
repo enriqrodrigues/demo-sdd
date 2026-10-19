@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { consultarScore, criarTarefa, listarTarefas, type DadosTarefa, type Score, type Tarefa } from './api'
+import {
+  consultarScore,
+  criarTarefa,
+  editarTarefa,
+  listarTarefas,
+  type DadosTarefa,
+  type Score,
+  type Tarefa,
+} from './api'
 import { PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
 
 /** Estado da tela: filtro ativo, a lista de tarefas correspondente e o score da semana. */
@@ -44,5 +52,13 @@ export function useTarefas() {
     [recarregar],
   )
 
-  return { tarefas, filtro, setFiltro, score, criar }
+  const editar = useCallback(
+    async (tarefa: Tarefa, dados: DadosTarefa) => {
+      await editarTarefa(tarefa.id, dados, tarefa.version)
+      recarregar()
+    },
+    [recarregar],
+  )
+
+  return { tarefas, filtro, setFiltro, score, criar, editar }
 }
