@@ -14,7 +14,7 @@ import br.com.demo.todo.comum.ValorEnum;
 
 /**
  * Corpo de criação e de edição de tarefa. O título chega sem os espaços das extremidades e a
- * descrição vazia vira {@code null}. Data e prioridade chegam como texto para que seus erros
+ * descrição vazia ou só com espaços vira {@code null}. Data e prioridade chegam como texto para que seus erros
  * sejam agregados aos demais. Campos calculados pelo servidor são aceitos e descartados; qualquer
  * outra propriedade desconhecida é rejeitada. {@code version} é obrigatória só na edição e
  * ignorada na criação.
@@ -45,7 +45,7 @@ public record TarefaRequisicao(
 
     public TarefaRequisicao {
         titulo = titulo == null ? null : titulo.strip();
-        descricao = descricao == null || descricao.isEmpty() ? null : descricao;
+        descricao = descricao == null || descricao.isBlank() ? null : descricao;
     }
 
     public LocalDate dataVencimentoConvertida() {

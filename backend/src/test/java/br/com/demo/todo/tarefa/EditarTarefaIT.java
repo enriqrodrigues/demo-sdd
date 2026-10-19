@@ -131,6 +131,17 @@ class EditarTarefaIT extends TesteIntegracao {
     }
 
     @Test
+    void versaoFracionariaNaoEhTruncada() throws Exception {
+        String id = criar();
+
+        editar(id, """
+                {"titulo":"Pagar conta","dataVencimento":"2026-10-25","prioridade":"ALTA","version":0.9}
+                """)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros[*].campo", hasItem("version")));
+    }
+
+    @Test
     void duasEdicoesSimultaneas() throws Exception {
         String id = criar();
 

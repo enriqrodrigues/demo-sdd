@@ -9,6 +9,7 @@ spring:
     deserialization:
       fail-on-unknown-properties: true
       fail-on-numbers-for-enums: true
+      accept-float-as-int: false
     mapper:
       accept-case-insensitive-enums: false
   jpa:

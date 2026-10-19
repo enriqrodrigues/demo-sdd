@@ -14,6 +14,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -55,7 +58,43 @@ public class ManipuladorErros extends ResponseEntityExceptionHandler {
                 ? argumento.getName()
                 : excecao.getPropertyName();
         return ResponseEntity.badRequest().body(problemaDeValidacao(
-                List.of(new ErroCampo(campo, "Valor inválido: " + excecao.getValue() + "."))));
+                List.of(new ErroCampo(campo, "Valor inválido."))));
+    }
+
+    @Override
+    @Nullable
+    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException excecao,
+            HttpHeaders cabecalhos, HttpStatusCode status, WebRequest requisicao) {
+        return emPortugues(super.handleNoResourceFoundException(excecao, cabecalhos, status, requisicao),
+                "Recurso não encontrado", "O endereço solicitado não existe.");
+    }
+
+    @Override
+    @Nullable
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+            HttpRequestMethodNotSupportedException excecao, HttpHeaders cabecalhos, HttpStatusCode status,
+            WebRequest requisicao) {
+        return emPortugues(super.handleHttpRequestMethodNotSupported(excecao, cabecalhos, status, requisicao),
+                "Método não permitido", "Este endereço não aceita o método HTTP usado.");
+    }
+
+    @Override
+    @Nullable
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException excecao,
+            HttpHeaders cabecalhos, HttpStatusCode status, WebRequest requisicao) {
+        return emPortugues(super.handleHttpMediaTypeNotSupported(excecao, cabecalhos, status, requisicao),
+                "Tipo de conteúdo não suportado", "Envie o corpo como application/json.");
+    }
+
+    /** Mantém status e cabeçalhos (ex.: Allow) da resposta do Spring, trocando os textos. */
+    @Nullable
+    private static ResponseEntity<Object> emPortugues(@Nullable ResponseEntity<Object> resposta, String titulo,
+            String detalhe) {
+        if (resposta != null && resposta.getBody() instanceof ProblemDetail problema) {
+            problema.setTitle(titulo);
+            problema.setDetail(detalhe);
+        }
+        return resposta;
     }
 
     /** Corpo ilegível: propriedade desconhecida ou tipo errado viram erro de campo; JSON quebrado, 400 simples. */

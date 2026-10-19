@@ -38,7 +38,8 @@ public class MapeadorTarefa {
                 tarefa.getPrioridade(),
                 tarefa.getStatus(),
                 concluidaEm,
-                CalculadoraPrazo.calcular(tarefa.getStatus(), tarefa.getDataVencimento(), hoje),
+                CalculadoraPrazo.calcular(tarefa.getStatus() == StatusTarefa.CONCLUIDA,
+                        tarefa.getDataVencimento(), hoje),
                 tarefa.getVersion());
     }
 }

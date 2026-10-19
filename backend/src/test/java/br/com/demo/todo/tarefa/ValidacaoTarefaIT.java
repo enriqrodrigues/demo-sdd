@@ -80,7 +80,21 @@ class ValidacaoTarefaIT extends TesteIntegracao {
                 .andExpect(jsonPath("$.descricao").value(nullValue()));
     }
 
+    @Test
+    void descricaoSoComEspacosViraNula() throws Exception {
+        criar(com("descricao", "   "))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.descricao").value(nullValue()));
+    }
+
     // --- Validação da data de vencimento
+
+    @Test
+    void anoZeroNaoExisteNoCalendario() throws Exception {
+        criar(com("dataVencimento", "0000-01-01"))
+                .andExpect(status().isBadRequest())
+                .andExpect(erroNoCampo("dataVencimento"));
+    }
 
     @Test
     void vencimentoAusente() throws Exception {

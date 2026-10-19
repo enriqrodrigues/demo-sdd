@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import br.com.demo.todo.prazo.CalculadoraPrazo;
 import br.com.demo.todo.prazo.SituacaoPrazo;
-import br.com.demo.todo.tarefa.StatusTarefa;
 
 /** Spec prazo-tarefa › Data corrente no fuso configurado. O Clock é UTC, como o bean de produção. */
 class DataCorrenteTest {
@@ -25,7 +24,7 @@ class DataCorrenteTest {
         DataCorrente dataCorrente = new DataCorrente(CLOCK, ZoneId.of("America/Sao_Paulo"));
 
         assertThat(dataCorrente.hoje()).isEqualTo(LocalDate.parse("2026-10-20"));
-        assertThat(CalculadoraPrazo.calcular(StatusTarefa.PENDENTE, VENCIMENTO, dataCorrente.hoje()))
+        assertThat(CalculadoraPrazo.calcular(false, VENCIMENTO, dataCorrente.hoje()))
                 .isEqualTo(SituacaoPrazo.PARA_HOJE);
     }
 
@@ -34,7 +33,7 @@ class DataCorrenteTest {
         DataCorrente dataCorrente = new DataCorrente(CLOCK, ZoneId.of("UTC"));
 
         assertThat(dataCorrente.hoje()).isEqualTo(LocalDate.parse("2026-10-21"));
-        assertThat(CalculadoraPrazo.calcular(StatusTarefa.PENDENTE, VENCIMENTO, dataCorrente.hoje()))
+        assertThat(CalculadoraPrazo.calcular(false, VENCIMENTO, dataCorrente.hoje()))
                 .isEqualTo(SituacaoPrazo.ATRASADA);
     }
 }

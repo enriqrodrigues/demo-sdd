@@ -18,7 +18,10 @@ final class ConsultasTarefa {
     private ConsultasTarefa() {
     }
 
-    /** Vencimento crescente, prioridade decrescente (ALTA, MEDIA, BAIXA) e título crescente. */
+    /**
+     * Vencimento crescente, prioridade decrescente (ALTA, MEDIA, BAIXA) e título crescente. Define a
+     * ordenação dentro da Specification, então não serve para consultas de contagem ou paginadas.
+     */
     static Specification<Tarefa> ordenadaParaListagem() {
         return (raiz, consulta, cb) -> {
             consulta.orderBy(

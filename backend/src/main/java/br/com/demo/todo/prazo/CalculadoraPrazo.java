@@ -2,16 +2,14 @@ package br.com.demo.todo.prazo;
 
 import java.time.LocalDate;
 
-import br.com.demo.todo.tarefa.StatusTarefa;
-
-/** Situação de prazo derivada de status, vencimento e data corrente; nunca persistida. */
+/** Situação de prazo derivada da conclusão, do vencimento e da data corrente; nunca persistida. */
 public final class CalculadoraPrazo {
 
     private CalculadoraPrazo() {
     }
 
-    public static SituacaoPrazo calcular(StatusTarefa status, LocalDate dataVencimento, LocalDate hoje) {
-        if (status == StatusTarefa.CONCLUIDA) {
+    public static SituacaoPrazo calcular(boolean concluida, LocalDate dataVencimento, LocalDate hoje) {
+        if (concluida) {
             return SituacaoPrazo.CONCLUIDA;
         }
         if (hoje.isAfter(dataVencimento)) {

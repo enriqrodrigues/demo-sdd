@@ -29,8 +29,8 @@ public class DataIsoValidator implements ConstraintValidator<DataIso, String> {
             return false;
         }
         try {
-            converter(valor);
-            return true;
+            // O PostgreSQL não tem ano 0: 0000-01-01 seria gravado como outra data.
+            return converter(valor).getYear() >= 1;
         } catch (DateTimeParseException e) {
             return false;
         }
