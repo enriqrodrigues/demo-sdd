@@ -96,3 +96,24 @@ body {
   text-align: center;
   padding: 32px 0;
 }
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.filtro {
+  border: 1px solid #cbd2d9;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.filtro.ativo {
+  background: var(--azul);
+  border-color: var(--azul);
+  color: #fff;
+}

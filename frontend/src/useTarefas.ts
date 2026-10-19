@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import { listarTarefas, type Tarefa } from './api'
+import { PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
 
-/** Estado da tela: lista de tarefas carregada da API. */
+/** Estado da tela: filtro ativo e a lista de tarefas correspondente, carregada da API. */
 export function useTarefas() {
+  const [filtro, setFiltro] = useState<Filtro>('TODAS')
   const [tarefas, setTarefas] = useState<Tarefa[] | null>(null)
 
   useEffect(() => {
     let ativo = true
-    listarTarefas().then((lista) => {
+    listarTarefas(PARAMETROS_DO_FILTRO[filtro]).then((lista) => {
       if (ativo) {
         setTarefas(lista)
       }
@@ -15,7 +17,7 @@ export function useTarefas() {
     return () => {
       ativo = false
     }
-  }, [])
+  }, [filtro])
 
-  return { tarefas }
+  return { tarefas, filtro, setFiltro }
 }
