@@ -88,9 +88,9 @@ A entidade usa `@Version`. No `PUT`, o serviço compara a `version` recebida com
 
 ### D7. Desserialização estrita e erros em Problem Details
 
-Jackson configurado com `FAIL_ON_UNKNOWN_PROPERTIES=true`, `FAIL_ON_NUMBERS_FOR_ENUMS=true` e `ACCEPT_CASE_INSENSITIVE_ENUMS=false`; `LocalDate` aceita apenas `YYYY-MM-DD` estrito (`ResolverStyle.STRICT`, rejeitando `2026-02-30`). Os campos somente leitura (`id`, `status`, `concluidaEm`, `situacaoPrazo`) são declarados no DTO de entrada e marcados como ignorados, para que sejam aceitos e descartados — e não rejeitados como desconhecidos. `version` existe apenas no DTO de edição.
+Jackson configurado com `FAIL_ON_UNKNOWN_PROPERTIES=true`, `FAIL_ON_NUMBERS_FOR_ENUMS=true` e `ACCEPT_CASE_INSENSITIVE_ENUMS=false`. `dataVencimento`, assim como `prioridade`, chega como texto no DTO de entrada e é validada por um validador de bean: apenas `YYYY-MM-DD` estrito e data real (`ResolverStyle.STRICT`, rejeitando `2026-02-30`). Os campos somente leitura (`id`, `status`, `concluidaEm`, `situacaoPrazo`) são declarados no DTO de entrada e marcados como ignorados, para que sejam aceitos e descartados — e não rejeitados como desconhecidos. `version` existe apenas no DTO de edição.
 
-Um único `@RestControllerAdvice` estendendo `ResponseEntityExceptionHandler` produz `ProblemDetail` (`spring.mvc.problemdetails.enabled=true`) para: validação de bean (agrega todos os campos em `erros[{campo, mensagem}]`), JSON malformado e erros de tipo/enum/data do Jackson (mapeados para o campo de origem quando identificável), parâmetro de filtro ou UUID inválido (400), tarefa inexistente (404), conflito (409) e qualquer outra exceção (500 com `detail` genérico, sem stack trace; o detalhe vai só para o log). Para o caso de vários campos inválidos que inclui um enum desconhecido, o DTO recebe enum como texto e a validação de domínio é feita por um validador de bean, de modo que todos os erros sejam reportados juntos em vez de o Jackson abortar no primeiro.
+Um único `@RestControllerAdvice` estendendo `ResponseEntityExceptionHandler` produz `ProblemDetail` (`spring.mvc.problemdetails.enabled=true`) para: validação de bean (agrega todos os campos em `erros[{campo, mensagem}]`), JSON malformado e erros de tipo/enum/data do Jackson (mapeados para o campo de origem quando identificável), parâmetro de filtro ou UUID inválido (400), tarefa inexistente (404), conflito (409) e qualquer outra exceção (500 com `detail` genérico, sem stack trace; o detalhe vai só para o log). Para que todos os campos inválidos sejam reportados juntos, o DTO recebe `prioridade` e `dataVencimento` como texto e a validação de domínio é feita por validadores de bean, em vez de o Jackson abortar no primeiro valor inválido.
 
 ### D8. Configuração e segurança local
 
@@ -111,7 +111,7 @@ Estado em um hook `useTarefas` (lista, filtro, ids em operação, tarefa em edi�
 - [Avast intercepta TLS e quebra downloads do Maven] → documentar no README a execução com `MAVEN_OPTS=-Djavax.net.ssl.trustStoreType=Windows-ROOT`, sem alterar arquivos versionados.
 - [Docker Desktop parado faz os testes de integração falharem de forma pouco clara] → README orienta iniciar o Docker; os testes unitários de regra não dependem dele.
 - [Predicados do filtro por situação divergirem da `CalculadoraPrazo`] → teste de integração que, para um conjunto de tarefas cobrindo os quatro casos, compara o filtro com a situação calculada de cada item.
-- [Validação agregada x falha precoce do Jackson em enum inválido] → receber enum como texto no DTO de entrada (D7); teste específico do cenário "Vários campos inválidos".
+- [Validação agregada x falha precoce do Jackson em enum ou data inválidos] → receber `prioridade` e `dataVencimento` como texto no DTO de entrada (D7); teste específico do cenário "Vários campos inválidos".
 - [Editar `dataVencimento` de tarefa concluída altera o score retroativamente] → comportamento aceito e especificado (cenário "Vencimento editado após a conclusão").
 - [Sem paginação] → aceitável para usuário único; revisitar se o volume crescer.
 
