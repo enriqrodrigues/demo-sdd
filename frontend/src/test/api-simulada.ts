@@ -89,6 +89,16 @@ export function apiEmMemoria(iniciais: Tarefa[], { atraso = 0 } = {}) {
         percentual: concluidas === 0 ? null : 100,
       })
     }),
+    http.put('/api/tarefas/:id', async ({ params, request }) => {
+      await delay(atraso)
+      const tarefa = buscar(params.id)
+      if (!tarefa) return problema(404)
+      const { version, ...dados } = (await request.json()) as Record<string, unknown>
+      if (version !== tarefa.version) return problema(409)
+      Object.assign(tarefa, dados, { version: tarefa.version + 1 })
+      tarefa.situacaoPrazo = situacao(tarefa)
+      return HttpResponse.json(tarefa)
+    }),
     transicao('concluir', 'CONCLUIDA'),
     transicao('reabrir', 'PENDENTE'),
     http.delete('/api/tarefas/:id', async ({ params }) => {
@@ -100,7 +110,14 @@ export function apiEmMemoria(iniciais: Tarefa[], { atraso = 0 } = {}) {
       return new HttpResponse(null, { status: 204 })
     }),
   )
-  return { tarefas, contagem }
+  /** Simula outra aba excluindo a tarefa depois que esta já a exibiu. */
+  const excluirEmOutraAba = (titulo: string) => {
+    tarefas.splice(
+      tarefas.findIndex((t) => t.titulo === titulo),
+      1,
+    )
+  }
+  return { tarefas, contagem, excluirEmOutraAba }
 }
 
 export function problema(status: number, extra: object = {}) {

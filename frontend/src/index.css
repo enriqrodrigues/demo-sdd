@@ -255,3 +255,18 @@ button:disabled {
   padding: 6px 14px;
   cursor: pointer;
 }
+
+.aviso-global {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.aviso-global button {
+  border: none;
+  background: transparent;
+  text-decoration: underline;
+  cursor: pointer;
+}

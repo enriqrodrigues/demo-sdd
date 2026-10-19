@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ErroConflito, type DadosTarefa, type Tarefa } from './api'
+import { ErroConflito, ErroNaoEncontrado, type DadosTarefa, type Tarefa } from './api'
 import { CabecalhoScore } from './componentes/CabecalhoScore'
 import { DialogoConfirmacao } from './componentes/DialogoConfirmacao'
 import { Filtros } from './componentes/Filtros'
@@ -38,6 +38,8 @@ export default function App() {
     emOperacao,
     alternarConclusao,
     excluir,
+    aviso,
+    limparAviso,
   } = useTarefas()
   const [formulario, setFormulario] = useState<EstadoFormulario>({ modo: 'fechado' })
   const [paraExcluir, setParaExcluir] = useState<Tarefa | null>(null)
@@ -60,6 +62,11 @@ export default function App() {
       await editar(tarefa, dados)
       fechar()
     } catch (erro) {
+      if (erro instanceof ErroNaoEncontrado) {
+        // A tarefa já saiu da lista e o aviso foi exibido; não há mais o que editar.
+        fechar()
+        return
+      }
       if (!(erro instanceof ErroConflito)) {
         throw erro
       }
@@ -76,6 +83,14 @@ export default function App() {
         <CabecalhoScore score={score} />
       </header>
       <main>
+        {aviso && (
+          <div className="aviso aviso-global" role="alert">
+            <span>{aviso}</span>
+            <button type="button" onClick={limparAviso}>
+              Fechar
+            </button>
+          </div>
+        )}
         {formulario.modo === 'criar' && (
           <FormularioTarefa
             titulo="Nova tarefa"

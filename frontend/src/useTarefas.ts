@@ -8,11 +8,14 @@ import {
   excluirTarefa,
   listarTarefas,
   reabrirTarefa,
+  ErroNaoEncontrado,
   type DadosTarefa,
   type Score,
   type Tarefa,
 } from './api'
 import { PARAMETROS_DO_FILTRO, type Filtro } from './filtros'
+
+const AVISO_TAREFA_REMOVIDA = 'Esta tarefa não existe mais. Ela foi removida da lista.'
 
 /** Estado da tela: filtro ativo, a lista de tarefas correspondente e o score da semana. */
 export function useTarefas() {
@@ -48,6 +51,19 @@ export function useTarefas() {
 
   const recarregar = useCallback(() => setGeracao((g) => g + 1), [])
 
+  /** Mensagem para o usuário sobre o resultado de uma ação (ex.: tarefa que não existe mais). */
+  const [aviso, setAviso] = useState<string | null>(null)
+
+  /** A API respondeu 404: a tarefa foi excluída em outro lugar e sai da lista. */
+  const removerInexistente = useCallback(
+    (id: string) => {
+      setTarefas((lista) => lista?.filter((t) => t.id !== id) ?? null)
+      setAviso(AVISO_TAREFA_REMOVIDA)
+      recarregar()
+    },
+    [recarregar],
+  )
+
   const criar = useCallback(
     async (dados: DadosTarefa) => {
       await criarTarefa(dados)
@@ -56,12 +72,20 @@ export function useTarefas() {
     [recarregar],
   )
 
+  /** Rejeita com ErroNaoEncontrado (depois de remover a tarefa) para que o formulário seja fechado. */
   const editar = useCallback(
     async (tarefa: Tarefa, dados: DadosTarefa) => {
-      await editarTarefa(tarefa.id, dados, tarefa.version)
+      try {
+        await editarTarefa(tarefa.id, dados, tarefa.version)
+      } catch (erro) {
+        if (erro instanceof ErroNaoEncontrado) {
+          removerInexistente(tarefa.id)
+        }
+        throw erro
+      }
       recarregar()
     },
-    [recarregar],
+    [recarregar, removerInexistente],
   )
 
   /** Busca a versão atual de uma tarefa e atualiza lista e score. */
@@ -87,11 +111,16 @@ export function useTarefas() {
     setEmOperacao(new Set(operacoesAtivas.current))
     try {
       await acao()
+    } catch (erro) {
+      if (!(erro instanceof ErroNaoEncontrado)) {
+        throw erro
+      }
+      removerInexistente(id)
     } finally {
       operacoesAtivas.current.delete(id)
       setEmOperacao(new Set(operacoesAtivas.current))
     }
-  }, [])
+  }, [removerInexistente])
 
   const alternarConclusao = useCallback(
     (tarefa: Tarefa) =>
@@ -126,5 +155,7 @@ export function useTarefas() {
     emOperacao,
     alternarConclusao,
     excluir,
+    aviso,
+    limparAviso: () => setAviso(null),
   }
 }
