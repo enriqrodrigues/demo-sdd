@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: todo-inteligente
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USUARIO}
+    password: ${DB_SENHA}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+server:
+  address: 127.0.0.1
+  port: 8080
