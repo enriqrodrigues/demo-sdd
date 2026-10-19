@@ -39,13 +39,15 @@ O backend é organizado por módulo de domínio (`tarefa`, `prazo`, `produtivida
 
 Um bean `java.time.Clock` é a única fonte de "agora". A propriedade `app.fuso-horario` (padrão `America/Sao_Paulo`) define o `ZoneId` usado em todas as conversões instante → data local. Nenhum código chama `LocalDate.now()` ou `Instant.now()` sem o `Clock`.
 
+O bean `Clock` é `Clock.systemUTC()`; o fuso dele nunca é usado para obter datas. Toda data local de negócio ("hoje" e, a partir dela, a semana do score) vem de um único componente, `DataCorrente`, que calcula `LocalDate.ofInstant(clock.instant(), fuso)`. Nenhum código chama `LocalDate.now(clock)`.
+
 Testes unitários usam `Clock.fixed(...)`; testes de integração substituem o bean por um relógio mutável de teste, permitindo cenários de "passagem do tempo" e viradas de dia/semana.
 
 *Alternativa:* fuso enviado pelo cliente — descartado (decisão da exploração; usuário único).
 
 ### D3. Situação de prazo calculada no mapeamento para DTO
 
-`CalculadoraPrazo` é uma função pura `(status, dataVencimento, hoje) → SituacaoPrazo`. O mapeador entidade → DTO a invoca com `hoje = LocalDate.now(clock)`. A entidade não tem campo de situação, e nada a persiste.
+`CalculadoraPrazo` é uma função pura `(status, dataVencimento, hoje) → SituacaoPrazo`. O mapeador entidade → DTO a invoca com `hoje` obtido de `DataCorrente` (D2). A entidade não tem campo de situação, e nada a persiste.
 
 O filtro `?situacaoPrazo=` é traduzido para predicados de consulta sobre `status` e `dataVencimento` relativos a `hoje` (ex.: `ATRASADA` ⇒ `status = PENDENTE AND dataVencimento < hoje`), reutilizando a mesma definição em um único lugar para não divergir da calculadora — um teste confronta os dois caminhos.
 
@@ -53,7 +55,7 @@ O filtro `?situacaoPrazo=` é traduzido para predicados de consulta sobre `statu
 
 ### D4. Score calculado sob demanda
 
-`ServicoProdutividade` calcula a semana a partir de `LocalDate.now(clock)` com `TemporalAdjusters.previousOrSame(MONDAY)`, converte `[segunda 00:00, segunda seguinte 00:00)` no fuso configurado para um intervalo de `Instant` e consulta as tarefas `CONCLUIDA` com `concluida_em` nesse intervalo semiaberto. A classificação "no prazo" (`concluidaEm` na data local ≤ `dataVencimento`) e o percentual (`BigDecimal`, `HALF_UP`, escala 2; `null` se 0 concluídas) ficam em uma função pura testada isoladamente.
+`ServicoProdutividade` calcula a semana a partir de `hoje` obtido de `DataCorrente` (D2), com `TemporalAdjusters.previousOrSame(MONDAY)`, converte `[segunda 00:00, segunda seguinte 00:00)` no fuso configurado para um intervalo de `Instant` e consulta as tarefas `CONCLUIDA` com `concluida_em` nesse intervalo semiaberto. A classificação "no prazo" (`concluidaEm` na data local ≤ `dataVencimento`) e o percentual (`BigDecimal`, `HALF_UP`, escala 2; `null` se 0 concluídas) ficam em uma função pura testada isoladamente.
 
 Por ser calculado a cada consulta, o score reflete automaticamente reabertura, exclusão e edição de vencimento.
 
