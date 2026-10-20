@@ -3,9 +3,13 @@
 *Atualizado em 20/10/2026.*
 
 
-## SDD - SPEC-DRIVEN DEVELOPMENT
+## SDD – INTRODUÇÃO E PRÁTICA
 
 O **SDD (Spec-Driven Development)** já é uma das abordagens mais importantes quando falamos sobre trabalhar com Inteligência Artificial e agentes de código para o desenvolvimento de software.
+
+Eu resolvi testar dois dos principais frameworks de SDD disponíveis no momento, o Superpowers e o Openspec, e escrevi um pouco sobre os resultados e as impressões iniciais sobre as duas ferramentas. 
+
+Antes, uma introdução sobre o assunto que ainda é desconhecido para muitos desenvolvedores.
 
 ### O QUE É O SDD?
 
@@ -41,28 +45,26 @@ O fluxo básico do Spec-Driven Development pode ser dividido em três grandes et
 
 ### FRAMEWORKS DE SDD
 
-Já existem diversos frameworks e bibliotecas voltados para a construção de software usando SDD: GitHub Spec-kit; OpenSpec; Superpowers; BMAD Method, etc.
+Já existem diversos frameworks e bibliotecas voltados para a construção de software usando SDD. Entre os principais, podemos citar o **GitHub Spec-kit**, o **OpenSpec**, **Superpowers** e o **BMAD Method**.
 
 Apesar de todos serem baseados no mesmo fluxo de trabalho “Especificar, Planejar e Implementar”, cada uma dessas ferramentas possui suas próprias características. E não existe uma opção melhor que a outra. Cada uma vai atender um determinado cenário ou necessidade de projeto. Inclusive, em alguns casos, é possível combinar funções de ferramentas diferentes aproveitando as habilidades que melhor atendem cada etapa do processo.
 
-O Framework não concorre com os agentes de codificação (como o Claude Code ou Codex). Ele existe para estruturar o processo. O Agente continua executando, e o framework define o fluxo, os artefatos e a forma de trabalhar.
-
+*Detalhe: O Framework não concorre com os agentes de codificação (como o Claude Code ou Codex). Ele existe para estruturar o processo. O Agente continua executando, enquanto o framework define o fluxo, os artefatos e a forma de trabalhar.*
 
 ---
+*Agora que introduzimos o assunto, podemos falar sobre as ferramentas.*
 
-## TESTE - SUPERPOWERS | OPENSPEC
+## SUPERPOWERS | OPENSPEC
 
-*A seguir trago um pouco sobre as diferenças entre os dois frameworks e comento sobre os testes realizados com as duas ferramentas. Observação: Utilizei o Claude Code com Opus 5.5 em todos os testes.*
+Sites oficiais: [Superpowers](https://github.com/obra/superpowers) | [Openspec](https://openspec.dev/)
 
 ### INSTALAÇÃO E CONFIGURAÇÃO
 
 * #### Superpowers
 
-A instalação varia de acordo com o ambiente de integração (harness). Para a maioria dos casos (incluindo o Claude Code), o Superpowers está disponível no marketplace oficial de plugins do Claude. 
+A instalação varia de acordo com o ambiente de integração (harness). Para a maioria dos casos (incluindo o Claude Code), o Superpowers está disponível no marketplace oficial de plugins. 
 
 Se utilizar mais de um ambiente de integração, é necessário instalar separadamente para cada um deles.
-
-Detalhes no link oficial: https://github.com/obra/superpowers
 
 * #### Openspec
 
@@ -71,8 +73,6 @@ O OpenSpec é instalado globalmente no sistema operacional e, após a instalaç�
 Para inicializa-lo, acesse o diretório raiz do projeto e execute o comando ```openspec init``` no terminal.
 
 Ele pedirá para informar o ambiente de integração que será utilizado (pode selecionar mais de um). Após essa configuração, a estrutura de pastas e arquivos necessários será criada e as skills do framework ficarão disponíveis no projeto.
-
-Detalhes no link oficial: https://openspec.dev/
 
 ### ESTRUTURA DE ARQUIVOS
 
@@ -208,9 +208,9 @@ No OpenSpec, o usuário chama cada etapa com um comando, e o ritmo fica com ele.
 
 Acredito que a construção e manutenção da especificação é o ponto fraco do superpowers. Ele gera um documento de especificação e de planejamento por demanda. Após a aprovação, esses documentos não são alterados e envelhecem com o código. Se novas alterações são feitas na mesma funcionalidade, outros documentos serão gerados e será necessário ler o histórico completo para entender o seu comportamento.
 
-O OpenSpec gera uma documentação mais estruturada seperando a especificação atualizada e a especificação de cada mudança. Então, se uma funcionalidade é alterada várias vezes, além de existir o histórico dessas alterações. Há a especificação principal que é atualizada a cada mudança arquivada, com requisitos e cenários que continuam válidos depois da entrega. Essa especificação atual tende a ser uma fonte de consulta mais rápida.
+O OpenSpec gera uma documentação mais estruturada separando a especificação atualizada e a especificação de cada mudança. Então, se uma funcionalidade é alterada várias vezes, além de existir o histórico dessas alterações. Há a especificação principal que é atualizada a cada mudança arquivada, com requisitos e cenários que continuam válidos depois da entrega. Essa especificação atual tende a ser uma fonte de consulta mais rápida.
 
-Ainda em relação à especificação, observei que o Superpowers nem sempre segue à risca os princípios do SDD. Quando o usuário invoca a skill de brainstorming, ele classifica a tarefa em três tamanhos de trabalho: Tarefa rápida e clara; Mudança pequena; Projeto. Tarefas classificadas como "rápida e clara" não geram perguntas e nem documentação. Ele simplesmente pula a etapa de especificação e planejamento e parte direto para implementação. Não é um defeito, é um comportamento proposital. Isso pode trazer problemas a longo prazo, pois perde-se a rastreabilidade dessas mudanças e a especifiação fica divergente da implementação.
+Ainda em relação à especificação, observei que o Superpowers nem sempre segue à risca os princípios do SDD. Quando o usuário invoca a skill de brainstorming, ele classifica a tarefa em três tamanhos de trabalho: Tarefa rápida e clara; Mudança pequena; Projeto. Tarefas classificadas como "rápida e clara" não geram perguntas e nem documentação. Ele simplesmente pula a etapa de especificação e planejamento e parte direto para implementação. Não é um defeito, é um comportamento proposital. Isso pode trazer problemas a longo prazo, pois perde-se a rastreabilidade dessas mudanças e a especificação fica divergente da implementação.
 
 #### Implementação
 
@@ -238,7 +238,7 @@ O consumo de tokens também foi mais elevado (não medi os valores exatos). O Su
 
 Os frameworks devem ajudar a conduzir o fluxo de trabalho, mas é fundamental entender os princípios do SDD para aplica-los (ou até combina-los) de forma correta.
 
-Não dá para apontar qual ferramenta é melhor, mas quanto mais conhecermos os princípios do método e o funcionamento do frameworks, melhores poderão ser os resultados.
+Não dá para apontar qual ferramenta é melhor, mas quanto mais conhecermos os princípios do método e o funcionamento dos frameworks, melhores poderão ser os resultados.
 
 E no final, o que importa é entregar o software funcionando, e nisso todos os testes obtiveram sucesso.
 
